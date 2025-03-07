@@ -19,6 +19,8 @@ import { TwitterPost } from "./components/twitter-post";
 import Image from "next/image";
 import { Textarea } from "@/components/ui/textarea";
 import { Search } from "lucide-react";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import Link from "next/link";
 
 export type Article = {
   id: string;
@@ -194,12 +196,12 @@ export default function HomePage() {
               <div className="text-orange-500">✓</div>
             </div>
             <span className="text-xl font-bold">
-              <span className="text-blue-600">InCred</span>
-              <span className="text-orange-500">Money</span>
+              <span className="text-blue-600">team</span>
+              <span className="text-orange-500">42</span>
             </span>
           </div>
           <Button
-            variant="ghost"
+            variant="outline"
             onClick={handleLogout}
             className="cursor-pointer"
           >
@@ -208,35 +210,21 @@ export default function HomePage() {
         </div>
       </header>
 
-      <div className="flex gap-6 justify-center pb-2 my-16">
-        <div>
-          <h3
-            className={`text-md cursor-pointer ${
-              searchParams.get("page") === "create_post"
-                ? "text-red-600 bg-red-200 rounded-md px-2 py-1"
-                : "text-black py-1"
-            }`}
-            onClick={() => handleNavigation({ page: "create_post" })}
-          >
-            Create Post
-          </h3>
-        </div>
-        <div>
-          <h3
-            className={`text-md cursor-pointer ${
-              searchParams.get("page") === "old_post"
-                ? "text-red-600 bg-red-200 rounded-md px-2 py-1"
-                : "text-black py-1"
-            }`}
-            onClick={() => handleNavigation({ page: "old_post" })}
-          >
-            Old Post
-          </h3>
-        </div>
-      </div>
-
       <main className="container mx-auto px-4 py-8">
-        {searchParams.get("page") === "create_post" && (
+        <Tabs
+          defaultValue="create_post"
+          className="flex h-full justify-items-start space-x-4 lg:p-0 mb-8"
+        >
+          <TabsList>
+            <TabsTrigger value="create_post" className="relative" asChild>
+              <Link href="/home?page=create_post">Create Post</Link>
+            </TabsTrigger>
+            <TabsTrigger value="old_post" className="relative" asChild>
+              <Link href="/home?page=old_post">Old Post</Link>
+            </TabsTrigger>
+          </TabsList>
+        </Tabs>
+        {searchParams.get("page") !== "old_post" && (
           <div>
             <div className="mb-12 text-center">
               <h2 className="mb-2 text-4xl font-bold">
@@ -285,7 +273,7 @@ export default function HomePage() {
                 ></Textarea>
               </CardContent>
               <CardFooter className="flex justify-center gap-4 pb-4">
-                {searchParams.get("page") === "create_post" ? (
+                {searchParams.get("page") !== "old_post" ? (
                   <div className="gap-4 flex">
                     <LinkedInPost article={article} />
                     <InstagramPost article={article} />
@@ -361,7 +349,7 @@ export default function HomePage() {
                         size="sm"
                         onClick={() => toggleEditMode(article.id)}
                       >
-                        {`${editMode ? "Cancel" : "Edit"}`}
+                        {`${editStates[article.id] ? "Cancel" : "Edit"}`}
                       </Button>
                       <Button
                         className="px-16 py-4 rounded-xl"

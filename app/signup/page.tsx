@@ -65,8 +65,8 @@ export default function SignupPage() {
               <div className="text-orange-500">✓</div>
             </div>
             <span className="text-xl font-bold">
-              <span className="text-blue-600">InCred</span>
-              <span className="text-orange-500">Money</span>
+              <span className="text-blue-600">team</span>
+              <span className="text-orange-500">42</span>
             </span>
           </div>
         </div>
