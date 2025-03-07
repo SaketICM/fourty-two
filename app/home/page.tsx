@@ -25,6 +25,11 @@ export type Article = {
   image: string;
   text: string;
   citation: string;
+  meta: {
+    likes: number;
+    reach: number;
+    impressions: number;
+  };
 };
 
 export default function HomePage() {
@@ -35,9 +40,57 @@ export default function HomePage() {
 
   const [editMode, setEditMode] = useState(false);
 
-  const [likes, setLikes] = useState(0);
-  const [reach, setReach] = useState(0);
-  const [impressions, setImpressions] = useState(0);
+  const [editStates, setEditStates] = useState<{ [key: string]: boolean }>({});
+  const [articleValues, setArticleValues] = useState<{
+    [key: string]: Article;
+  }>({});
+
+  // Toggle edit mode for a specific article
+  const toggleEditMode = (id: string) => {
+    setEditStates((prev) => ({ ...prev, [id]: !prev[id] }));
+    if (!editStates[id]) {
+      setArticleValues((prev) => ({
+        ...prev,
+        [id]: articles.find((article) => article.id === id) || {
+          id: "",
+          image: "",
+          text: "",
+          citation: "",
+          meta: {
+            likes: 0,
+            reach: 0,
+            impressions: 0,
+          },
+        },
+      }));
+    }
+  };
+
+  // Handle input change for a specific article
+  const handleChange = (
+    id: string,
+    field: keyof Article["meta"],
+    value: number
+  ) => {
+    setArticleValues((prev) => ({
+      ...prev,
+      [id]: {
+        ...prev[id],
+        meta: {
+          likes: prev[id]?.meta?.likes || 0,
+          reach: prev[id]?.meta?.reach || 0,
+          impressions: prev[id]?.meta?.impressions || 0,
+          [field]: value,
+        },
+      },
+    }));
+  };
+
+  // Handle submit for a specific article
+  const handleSubmit = (id: string) => {
+    console.log(`Updated values for article ${id}:`, articleValues[id]?.meta);
+    toggleEditMode(id);
+  };
 
   // Mock articles data
   const articles: Article[] = [
@@ -47,6 +100,11 @@ export default function HomePage() {
         "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800",
       text: "Excited to share that I've just completed a major redesign project forour flagship product! 🎉Excited to share that I've just completed a major redesign project forour flagship product! 🎉Excited to share that I've just completed a major redesign project forour flagship product! 🎉Excited to share that I've just completed a major redesign project forour flagship product! 🎉Excited to share that I've just completed a major redesign project forour flagship product! 🎉",
       citation: "Trends in retail investors shifting from stocks to bonds",
+      meta: {
+        likes: 100,
+        reach: 1000,
+        impressions: 973,
+      },
     },
     {
       id: "98",
@@ -54,6 +112,11 @@ export default function HomePage() {
         "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800",
       text: "Excited to share that I've just completed a major redesign project forour flagship product! 🎉",
       citation: "Trends in retail investors shifting from stocks to bonds",
+      meta: {
+        likes: 10,
+        reach: 243,
+        impressions: 155,
+      },
     },
     {
       id: "09oji",
@@ -61,6 +124,11 @@ export default function HomePage() {
         "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800",
       text: "Excited to share that I've just completed a major redesign project forour flagship product! 🎉",
       citation: "Trends in retail investors shifting from stocks to bonds",
+      meta: {
+        likes: 100,
+        reach: 1000,
+        impressions: 973,
+      },
     },
     {
       id: "09oi",
@@ -68,6 +136,11 @@ export default function HomePage() {
         "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800",
       text: "Excited to share that I've just completed a major redesign project forour flagship product! 🎉",
       citation: "Trends in retail investors shifting from stocks to bonds",
+      meta: {
+        likes: 100,
+        reach: 1000,
+        impressions: 973,
+      },
     },
     {
       id: "09o978i",
@@ -75,6 +148,11 @@ export default function HomePage() {
         "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800",
       text: "Excited to share that I've just completed a major redesign project forour flagship product! 🎉",
       citation: "Trends in retail investors shifting from stocks to bonds",
+      meta: {
+        likes: 100,
+        reach: 1000,
+        impressions: 973,
+      },
     },
     {
       id: "98oi",
@@ -82,14 +160,16 @@ export default function HomePage() {
         "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800",
       text: "Excited to share that I've just completed a major redesign project forour flagship product! 🎉",
       citation: "Trends in retail investors shifting from stocks to bonds",
+      meta: {
+        likes: 100,
+        reach: 1000,
+        impressions: 973,
+      },
     },
   ];
 
   useEffect(() => {
-    // Check if user is authenticated
     const token = getToken();
-
-    // If no token exists, redirect to login page
     if (!token) {
       router.push("/login");
     }
@@ -218,10 +298,19 @@ export default function HomePage() {
                         <Heart className="cursor-pointer" />
                         <input
                           type="input"
-                          value={likes}
-                          readOnly={!editMode}
-                          onChange={(e) => setLikes(Number(e.target.value))}
+                          value={
+                            articleValues[article.id]?.meta?.likes ??
+                            article.meta?.likes
+                          }
                           className="max-w-14 ml-2 text-lg focus:outline-0"
+                          readOnly={!editStates[article.id]}
+                          onChange={(e) =>
+                            handleChange(
+                              article.id,
+                              "likes",
+                              Number(e.target.value)
+                            )
+                          }
                         />
                       </div>
 
@@ -229,10 +318,19 @@ export default function HomePage() {
                         <Send className="cursor-pointer" />
                         <input
                           type="input"
-                          value={reach}
-                          readOnly={!editMode}
-                          onChange={(e) => setReach(Number(e.target.value))}
+                          value={
+                            articleValues[article.id]?.meta?.reach ??
+                            article.meta?.reach
+                          }
                           className="max-w-14 ml-2 text-lg focus:outline-0"
+                          readOnly={!editStates[article.id]}
+                          onChange={(e) =>
+                            handleChange(
+                              article.id,
+                              "reach",
+                              Number(e.target.value)
+                            )
+                          }
                         />
                       </div>
 
@@ -240,12 +338,19 @@ export default function HomePage() {
                         <ChartNoAxesColumn className="cursor-pointer" />
                         <input
                           type="input"
-                          value={impressions}
-                          readOnly={!editMode}
-                          onChange={(e) =>
-                            setImpressions(Number(e.target.value))
+                          value={
+                            articleValues[article.id]?.meta?.impressions ??
+                            article.meta?.impressions
                           }
                           className="max-w-14 ml-2 text-lg focus:outline-0"
+                          readOnly={!editStates[article.id]}
+                          onChange={(e) =>
+                            handleChange(
+                              article.id,
+                              "impressions",
+                              Number(e.target.value)
+                            )
+                          }
                         />
                       </div>
                     </div>
@@ -254,11 +359,16 @@ export default function HomePage() {
                         variant="outline"
                         className="px-16 py-4 rounded-xl cursor-pointer"
                         size="sm"
-                        onClick={() => setEditMode(!editMode)}
+                        onClick={() => toggleEditMode(article.id)}
                       >
                         {`${editMode ? "Cancel" : "Edit"}`}
                       </Button>
-                      <Button className="px-16 py-4 rounded-xl" size="sm">
+                      <Button
+                        className="px-16 py-4 rounded-xl"
+                        size="sm"
+                        disabled={!editStates[article.id]}
+                        onClick={() => handleSubmit(article.id)}
+                      >
                         Submit
                       </Button>
                     </div>
