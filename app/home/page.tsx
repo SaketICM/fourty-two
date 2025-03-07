@@ -12,6 +12,7 @@ import {
   CardHeader,
 } from "@/components/ui/card";
 import { toast } from "sonner";
+import { ChartNoAxesColumn, Heart, Send } from "lucide-react";
 
 interface Article {
   id: number;
@@ -22,6 +23,12 @@ interface Article {
 export default function HomePage() {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
+
+  const [editMode, setEditMode] = useState(false);
+
+  const [likes, setLikes] = useState(0);
+  const [reach, setReach] = useState(0);
+  const [impressions, setImpressions] = useState(0);
 
   // Mock articles data
   const articles: Article[] = [
@@ -109,53 +116,83 @@ export default function HomePage() {
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pr-10 rounded-full"
             />
-            <div className="absolute inset-y-0 right-0 flex items-center pr-3">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-5 w-5 text-gray-400"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                />
-              </svg>
-            </div>
           </div>
         </div>
 
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
           {articles.map((article) => (
-            <Card key={article.id} className="overflow-hidden">
-              <CardHeader className="p-4">
-                <div className="flex justify-center">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-16 w-16 text-gray-800"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="1"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <rect x="2" y="6" width="20" height="12" rx="2" />
-                    <circle cx="12" cy="12" r="2" />
-                    <path d="M6 12h.01M18 12h.01" />
-                  </svg>
-                </div>
-              </CardHeader>
-              <CardContent className="text-center">
-                <p className="mb-2 text-sm text-gray-500">{article.date}</p>
-                <h3 className="font-medium">{article.title}</h3>
+            <Card key={article.id} className="overflow-hidden p-4">
+              <img />
+              <CardContent className="flex">
+                <CardHeader className="p-4">
+                  <div className="flex justify-center">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-16 w-16 text-gray-800"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="1"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <rect x="2" y="6" width="20" height="12" rx="2" />
+                      <circle cx="12" cy="12" r="2" />
+                      <path d="M6 12h.01M18 12h.01" />
+                    </svg>
+                  </div>
+                </CardHeader>
+                <h3 className="font-medium m-5">{article.title}</h3>
               </CardContent>
-              <CardFooter className="flex justify-center pb-4">
-                <Button variant="ghost" size="sm" className="text-xs">
-                  View details
+              <CardFooter className="flex justify-center pb-4"></CardFooter>
+
+              <div className="flex justify-left">
+                <div className="flex items-center ml-8 my-5">
+                  <Heart className="cursor-pointer" />
+                  <input
+                    type="input"
+                    value={likes}
+                    readOnly={!editMode}
+                    onChange={(e) => setLikes(Number(e.target.value))}
+                    className="max-w-14 ml-2 text-lg focus:outline-0"
+                  />
+                </div>
+
+                <div className="flex items-center my-5 ml-5">
+                  <Send className="cursor-pointer" />
+                  <input
+                    type="input"
+                    value={reach}
+                    readOnly={!editMode}
+                    onChange={(e) => setReach(Number(e.target.value))}
+                    className="max-w-14 ml-2 text-lg focus:outline-0"
+                  />
+                </div>
+
+                <div className="flex items-center my-5 ml-5">
+                  <ChartNoAxesColumn className="cursor-pointer" />
+                  <input
+                    type="input"
+                    value={impressions}
+                    readOnly={!editMode}
+                    onChange={(e) => setImpressions(Number(e.target.value))}
+                    className="max-w-14 ml-2 text-lg focus:outline-0"
+                  />
+                </div>
+              </div>
+
+              <CardFooter className="flex justify-start gap-4 p-4">
+                <Button
+                  variant="outline"
+                  className="px-20 py-4 rounded-xl cursor-pointer"
+                  size="sm"
+                  onClick={() => setEditMode(!editMode)}
+                >
+                  {`${editMode ? 'Cancel' : 'Edit'}`}
+                </Button>
+
+                <Button className="px-20 py-4 rounded-xl" size="sm">
+                  Submit
                 </Button>
               </CardFooter>
             </Card>
