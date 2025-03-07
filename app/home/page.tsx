@@ -75,7 +75,7 @@ export default function HomePage() {
   }, [router]);
 
   const handleLogout = () => {
-    localStorage.removeItem("token");
+    sessionStorage.removeItem("token");
     toast.success("Logged out successfully");
     router.push("/login");
   };
@@ -93,7 +93,7 @@ export default function HomePage() {
               <span className="text-orange-500">Money</span>
             </span>
           </div>
-          <Button variant="ghost" onClick={handleLogout}>
+          <Button variant="ghost" onClick={handleLogout} className="cursor-pointer">
             Logout
           </Button>
         </div>
