@@ -299,8 +299,10 @@ export default function HomePage() {
                         <input
                           type="input"
                           value={
-                            articleValues[article.id]?.meta?.likes ??
-                            article.meta?.likes
+                            editStates[article.id]
+                              ? articleValues[article.id]?.meta?.likes ??
+                                article.meta.likes
+                              : article.meta.likes
                           }
                           className="max-w-14 ml-2 text-lg focus:outline-0"
                           readOnly={!editStates[article.id]}
@@ -319,8 +321,10 @@ export default function HomePage() {
                         <input
                           type="input"
                           value={
-                            articleValues[article.id]?.meta?.reach ??
-                            article.meta?.reach
+                            editStates[article.id]
+                              ? articleValues[article.id]?.meta?.reach ??
+                                article.meta.reach
+                              : article.meta.reach
                           }
                           className="max-w-14 ml-2 text-lg focus:outline-0"
                           readOnly={!editStates[article.id]}
@@ -339,8 +343,10 @@ export default function HomePage() {
                         <input
                           type="input"
                           value={
-                            articleValues[article.id]?.meta?.impressions ??
-                            article.meta?.impressions
+                            editStates[article.id]
+                              ? articleValues[article.id]?.meta?.impressions ??
+                                article.meta.impressions
+                              : article.meta.impressions
                           }
                           className="max-w-14 ml-2 text-lg focus:outline-0"
                           readOnly={!editStates[article.id]}
@@ -361,7 +367,7 @@ export default function HomePage() {
                         size="sm"
                         onClick={() => toggleEditMode(article.id)}
                       >
-                        {`${editMode ? "Cancel" : "Edit"}`}
+                        {`${editStates[article.id] ? "Cancel" : "Edit"}`}
                       </Button>
                       <Button
                         className="px-16 py-4 rounded-xl"
