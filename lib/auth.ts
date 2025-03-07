@@ -65,7 +65,7 @@ export const registerUser = async (
   username: string
 ) => {
   try {
-    const response = await fetch("http://localhost:5000/auth/register", {
+    const response = await fetch("https://team42.incredmoney.com/api/auth/register", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -89,7 +89,7 @@ export const registerUser = async (
 // Login a user
 export const loginUser = async (email: string, password: string) => {
   try {
-    const response = await fetch("http://localhost:5000/auth/login", {
+    const response = await fetch("https://team42.incredmoney.com/api/auth/login", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -116,7 +116,7 @@ export const loginUser = async (email: string, password: string) => {
 export const updatePostMeta = async (postId: string, meta: any) => {
   try {
     const response = await fetch(
-      `http://localhost:5000/users/posts/${postId}/update`,
+      `https://team42.incredmoney.com/api/users/posts/${postId}/update`,
       {
         method: "POST",
         headers: {
@@ -141,7 +141,7 @@ export const updatePostMeta = async (postId: string, meta: any) => {
 
 export const getAllPosts = async () => {
   try {
-    const response = await fetch("http://localhost:5000/users/posts", {
+    const response = await fetch("https://team42.incredmoney.com/api/users/posts", {
       method: "GET",
       headers: {
         "Content-Type": "application/json",

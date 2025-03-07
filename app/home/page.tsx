@@ -231,10 +231,14 @@ export default function HomePage() {
         >
           <TabsList>
             <TabsTrigger value="create_post" className="relative" asChild>
-              <Link href={''} onClick={() => setcurrentState("create_post")}>Create Post</Link>
+              <Link href={""} onClick={() => setcurrentState("create_post")}>
+                Create Post
+              </Link>
             </TabsTrigger>
             <TabsTrigger value="old_post" className="relative" asChild>
-              <Link href={''} onClick={() => setcurrentState("old_post")}>Old Posts</Link>
+              <Link href={""} onClick={() => setcurrentState("old_post")}>
+                Old Posts
+              </Link>
             </TabsTrigger>
           </TabsList>
         </Tabs>
