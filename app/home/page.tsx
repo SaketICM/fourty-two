@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { getToken } from "@/lib/auth";
+import { getAllPosts, getToken, updatePostMeta } from "@/lib/auth";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
@@ -39,13 +39,19 @@ export default function HomePage() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const [searchQuery, setSearchQuery] = useState("");
+  const [currentState, setcurrentState] = useState("create_post");
 
-  const [editMode, setEditMode] = useState(false);
-
+  const [articles, setArticles] = useState<Article[] | null>(null);
   const [editStates, setEditStates] = useState<{ [key: string]: boolean }>({});
   const [articleValues, setArticleValues] = useState<{
     [key: string]: Article;
   }>({});
+
+  useEffect(() => {
+    getAllPosts().then((data) => {
+      console.log(data);
+    });
+  }, []);
 
   // Toggle edit mode for a specific article
   const toggleEditMode = (id: string) => {
@@ -53,7 +59,7 @@ export default function HomePage() {
     if (!editStates[id]) {
       setArticleValues((prev) => ({
         ...prev,
-        [id]: articles.find((article) => article.id === id) || {
+        [id]: articles?.find((article) => article.id === id) || {
           id: "",
           image: "",
           text: "",
@@ -89,86 +95,93 @@ export default function HomePage() {
   };
 
   // Handle submit for a specific article
-  const handleSubmit = (id: string) => {
-    console.log(`Updated values for article ${id}:`, articleValues[id]?.meta);
+  const handleSubmit = async (id: string) => {
+    const result = await updatePostMeta(id, articleValues[id]?.meta);
+
+    if (result?.success) {
+      toast.success("Article updated successfully");
+    } else {
+      toast.error("Failed to update article");
+    }
+
     toggleEditMode(id);
   };
 
   // Mock articles data
-  const articles: Article[] = [
-    {
-      id: "87y",
-      image:
-        "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800",
-      text: "Excited to share that I've just completed a major redesign project forour flagship product! 🎉Excited to share that I've just completed a major redesign project forour flagship product! 🎉Excited to share that I've just completed a major redesign project forour flagship product! 🎉Excited to share that I've just completed a major redesign project forour flagship product! 🎉Excited to share that I've just completed a major redesign project forour flagship product! 🎉",
-      citation: "Trends in retail investors shifting from stocks to bonds",
-      meta: {
-        likes: 100,
-        reach: 1000,
-        impressions: 973,
-      },
-    },
-    {
-      id: "98",
-      image:
-        "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800",
-      text: "Excited to share that I've just completed a major redesign project forour flagship product! 🎉",
-      citation: "Trends in retail investors shifting from stocks to bonds",
-      meta: {
-        likes: 10,
-        reach: 243,
-        impressions: 155,
-      },
-    },
-    {
-      id: "09oji",
-      image:
-        "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800",
-      text: "Excited to share that I've just completed a major redesign project forour flagship product! 🎉",
-      citation: "Trends in retail investors shifting from stocks to bonds",
-      meta: {
-        likes: 100,
-        reach: 1000,
-        impressions: 973,
-      },
-    },
-    {
-      id: "09oi",
-      image:
-        "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800",
-      text: "Excited to share that I've just completed a major redesign project forour flagship product! 🎉",
-      citation: "Trends in retail investors shifting from stocks to bonds",
-      meta: {
-        likes: 100,
-        reach: 1000,
-        impressions: 973,
-      },
-    },
-    {
-      id: "09o978i",
-      image:
-        "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800",
-      text: "Excited to share that I've just completed a major redesign project forour flagship product! 🎉",
-      citation: "Trends in retail investors shifting from stocks to bonds",
-      meta: {
-        likes: 100,
-        reach: 1000,
-        impressions: 973,
-      },
-    },
-    {
-      id: "98oi",
-      image:
-        "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800",
-      text: "Excited to share that I've just completed a major redesign project forour flagship product! 🎉",
-      citation: "Trends in retail investors shifting from stocks to bonds",
-      meta: {
-        likes: 100,
-        reach: 1000,
-        impressions: 973,
-      },
-    },
-  ];
+  // const articles: Article[] = [
+  //   {
+  //     id: "87y",
+  //     image:
+  //       "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800",
+  //     text: "Excited to share that I've just completed a major redesign project forour flagship product! 🎉Excited to share that I've just completed a major redesign project forour flagship product! 🎉Excited to share that I've just completed a major redesign project forour flagship product! 🎉Excited to share that I've just completed a major redesign project forour flagship product! 🎉Excited to share that I've just completed a major redesign project forour flagship product! 🎉",
+  //     citation: "Trends in retail investors shifting from stocks to bonds",
+  //     meta: {
+  //       likes: 100,
+  //       reach: 1000,
+  //       impressions: 973,
+  //     },
+  //   },
+  //   {
+  //     id: "98",
+  //     image:
+  //       "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800",
+  //     text: "Excited to share that I've just completed a major redesign project forour flagship product! 🎉",
+  //     citation: "Trends in retail investors shifting from stocks to bonds",
+  //     meta: {
+  //       likes: 10,
+  //       reach: 243,
+  //       impressions: 155,
+  //     },
+  //   },
+  //   {
+  //     id: "09oji",
+  //     image:
+  //       "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800",
+  //     text: "Excited to share that I've just completed a major redesign project forour flagship product! 🎉",
+  //     citation: "Trends in retail investors shifting from stocks to bonds",
+  //     meta: {
+  //       likes: 100,
+  //       reach: 1000,
+  //       impressions: 973,
+  //     },
+  //   },
+  //   {
+  //     id: "09oi",
+  //     image:
+  //       "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800",
+  //     text: "Excited to share that I've just completed a major redesign project forour flagship product! 🎉",
+  //     citation: "Trends in retail investors shifting from stocks to bonds",
+  //     meta: {
+  //       likes: 100,
+  //       reach: 1000,
+  //       impressions: 973,
+  //     },
+  //   },
+  //   {
+  //     id: "09o978i",
+  //     image:
+  //       "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800",
+  //     text: "Excited to share that I've just completed a major redesign project forour flagship product! 🎉",
+  //     citation: "Trends in retail investors shifting from stocks to bonds",
+  //     meta: {
+  //       likes: 100,
+  //       reach: 1000,
+  //       impressions: 973,
+  //     },
+  //   },
+  //   {
+  //     id: "98oi",
+  //     image:
+  //       "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800",
+  //     text: "Excited to share that I've just completed a major redesign project forour flagship product! 🎉",
+  //     citation: "Trends in retail investors shifting from stocks to bonds",
+  //     meta: {
+  //       likes: 100,
+  //       reach: 1000,
+  //       impressions: 973,
+  //     },
+  //   },
+  // ];
 
   useEffect(() => {
     const token = getToken();
@@ -213,18 +226,19 @@ export default function HomePage() {
       <main className="container mx-auto px-4 py-8">
         <Tabs
           defaultValue="create_post"
+          value={currentState}
           className="flex h-full justify-items-start space-x-4 lg:p-0 mb-8"
         >
           <TabsList>
             <TabsTrigger value="create_post" className="relative" asChild>
-              <Link href="/home?page=create_post">Create Post</Link>
+              <Link href={''} onClick={() => setcurrentState("create_post")}>Create Post</Link>
             </TabsTrigger>
             <TabsTrigger value="old_post" className="relative" asChild>
-              <Link href="/home?page=old_post">Old Post</Link>
+              <Link href={''} onClick={() => setcurrentState("old_post")}>Old Post</Link>
             </TabsTrigger>
           </TabsList>
         </Tabs>
-        {searchParams.get("page") !== "old_post" && (
+        {currentState !== "old_post" && (
           <div>
             <div className="mb-12 text-center">
               <h2 className="mb-2 text-4xl font-bold">
@@ -243,6 +257,11 @@ export default function HomePage() {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="pr-10 rounded-full"
+                  onKeyPress={(e) => {
+                    if (e.key === "Enter") {
+                      handleNavigation({ search: searchQuery });
+                    }
+                  }}
                 />
                 <div className="absolute inset-y-0 h-9 text-gray-400 right-0 flex items-center pr-3">
                   <Search />
@@ -253,124 +272,125 @@ export default function HomePage() {
         )}
 
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {articles.map((article) => (
-            <Card key={article.id} className="overflow-hidden p-4">
-              <CardHeader className="p-4">
-                <div className="flex justify-center">
-                  <Image
-                    height={200}
-                    width={200}
-                    className="w-full rounded-lg"
-                    alt="News Image"
-                    src={article.image}
-                  />
-                </div>
-              </CardHeader>
-              <CardContent className="text-center px-2">
-                <Textarea
-                  className="mb-2 text-sm text-gray-500 overflow-y-auto h-[120px]"
-                  defaultValue={article.text}
-                ></Textarea>
-              </CardContent>
-              <CardFooter className="flex justify-center gap-4 pb-4">
-                {searchParams.get("page") !== "old_post" ? (
-                  <div className="gap-4 flex">
-                    <LinkedInPost article={article} />
-                    <InstagramPost article={article} />
-                    <TwitterPost article={article} />
+          {articles &&
+            articles.map((article) => (
+              <Card key={article.id} className="overflow-hidden p-4">
+                <CardHeader className="p-4">
+                  <div className="flex justify-center">
+                    <Image
+                      height={200}
+                      width={200}
+                      className="w-full rounded-lg"
+                      alt="News Image"
+                      src={article.image}
+                    />
                   </div>
-                ) : (
-                  <div>
-                    <div className="flex justify-left">
-                      <div className="flex items-center ml-8 my-5">
-                        <Heart className="cursor-pointer" />
-                        <input
-                          type="input"
-                          value={
-                            editStates[article.id]
-                              ? articleValues[article.id]?.meta?.likes ??
-                                article.meta.likes
-                              : article.meta.likes
-                          }
-                          className="max-w-14 ml-2 text-lg focus:outline-0"
-                          readOnly={!editStates[article.id]}
-                          onChange={(e) =>
-                            handleChange(
-                              article.id,
-                              "likes",
-                              Number(e.target.value)
-                            )
-                          }
-                        />
-                      </div>
+                </CardHeader>
+                <CardContent className="text-center px-2">
+                  <Textarea
+                    className="mb-2 text-sm text-gray-500 overflow-y-auto h-[120px]"
+                    defaultValue={article.text}
+                  ></Textarea>
+                </CardContent>
+                <CardFooter className="flex justify-center gap-4 pb-4">
+                  {searchParams.get("page") !== "old_post" ? (
+                    <div className="gap-4 flex">
+                      <LinkedInPost article={article} />
+                      <InstagramPost article={article} />
+                      <TwitterPost article={article} />
+                    </div>
+                  ) : (
+                    <div>
+                      <div className="flex justify-left">
+                        <div className="flex items-center ml-8 my-5">
+                          <Heart className="cursor-pointer" />
+                          <input
+                            type="input"
+                            value={
+                              editStates[article.id]
+                                ? articleValues[article.id]?.meta?.likes ??
+                                  article.meta.likes
+                                : article.meta.likes
+                            }
+                            className="max-w-14 ml-2 text-lg focus:outline-0"
+                            readOnly={!editStates[article.id]}
+                            onChange={(e) =>
+                              handleChange(
+                                article.id,
+                                "likes",
+                                Number(e.target.value)
+                              )
+                            }
+                          />
+                        </div>
 
-                      <div className="flex items-center my-5 ml-5">
-                        <Send className="cursor-pointer" />
-                        <input
-                          type="input"
-                          value={
-                            editStates[article.id]
-                              ? articleValues[article.id]?.meta?.reach ??
-                                article.meta.reach
-                              : article.meta.reach
-                          }
-                          className="max-w-14 ml-2 text-lg focus:outline-0"
-                          readOnly={!editStates[article.id]}
-                          onChange={(e) =>
-                            handleChange(
-                              article.id,
-                              "reach",
-                              Number(e.target.value)
-                            )
-                          }
-                        />
-                      </div>
+                        <div className="flex items-center my-5 ml-5">
+                          <Send className="cursor-pointer" />
+                          <input
+                            type="input"
+                            value={
+                              editStates[article.id]
+                                ? articleValues[article.id]?.meta?.reach ??
+                                  article.meta.reach
+                                : article.meta.reach
+                            }
+                            className="max-w-14 ml-2 text-lg focus:outline-0"
+                            readOnly={!editStates[article.id]}
+                            onChange={(e) =>
+                              handleChange(
+                                article.id,
+                                "reach",
+                                Number(e.target.value)
+                              )
+                            }
+                          />
+                        </div>
 
-                      <div className="flex items-center my-5 ml-5">
-                        <ChartNoAxesColumn className="cursor-pointer" />
-                        <input
-                          type="input"
-                          value={
-                            editStates[article.id]
-                              ? articleValues[article.id]?.meta?.impressions ??
-                                article.meta.impressions
-                              : article.meta.impressions
-                          }
-                          className="max-w-14 ml-2 text-lg focus:outline-0"
-                          readOnly={!editStates[article.id]}
-                          onChange={(e) =>
-                            handleChange(
-                              article.id,
-                              "impressions",
-                              Number(e.target.value)
-                            )
-                          }
-                        />
+                        <div className="flex items-center my-5 ml-5">
+                          <ChartNoAxesColumn className="cursor-pointer" />
+                          <input
+                            type="input"
+                            value={
+                              editStates[article.id]
+                                ? articleValues[article.id]?.meta
+                                    ?.impressions ?? article.meta.impressions
+                                : article.meta.impressions
+                            }
+                            className="max-w-14 ml-2 text-lg focus:outline-0"
+                            readOnly={!editStates[article.id]}
+                            onChange={(e) =>
+                              handleChange(
+                                article.id,
+                                "impressions",
+                                Number(e.target.value)
+                              )
+                            }
+                          />
+                        </div>
+                      </div>
+                      <div className="flex justify-between">
+                        <Button
+                          variant="outline"
+                          className="px-16 py-4 rounded-xl cursor-pointer"
+                          size="sm"
+                          onClick={() => toggleEditMode(article.id)}
+                        >
+                          {`${editStates[article.id] ? "Cancel" : "Edit"}`}
+                        </Button>
+                        <Button
+                          className="px-16 py-4 rounded-xl cursor-pointer"
+                          size="sm"
+                          disabled={!editStates[article.id]}
+                          onClick={() => handleSubmit(article.id)}
+                        >
+                          Submit
+                        </Button>
                       </div>
                     </div>
-                    <div className="flex justify-between">
-                      <Button
-                        variant="outline"
-                        className="px-16 py-4 rounded-xl cursor-pointer"
-                        size="sm"
-                        onClick={() => toggleEditMode(article.id)}
-                      >
-                        {`${editStates[article.id] ? "Cancel" : "Edit"}`}
-                      </Button>
-                      <Button
-                        className="px-16 py-4 rounded-xl"
-                        size="sm"
-                        disabled={!editStates[article.id]}
-                        onClick={() => handleSubmit(article.id)}
-                      >
-                        Submit
-                      </Button>
-                    </div>
-                  </div>
-                )}
-              </CardFooter>
-            </Card>
-          ))}
+                  )}
+                </CardFooter>
+              </Card>
+            ))}
         </div>
       </main>
     </div>
