@@ -1,45 +1,83 @@
-// Client-side authentication utilities
-
-// Mock user data
-const MOCK_USERS: { email: string; password: string }[] = [];
-
 // Store token in localStorage
 export const setToken = (token: string) => {
   if (typeof window !== "undefined") {
-    localStorage.setItem("token", token);
+    sessionStorage.setItem("token", token);
   }
 };
 
 // Get token from localStorage
 export const getToken = (): string | null => {
-  if (typeof window !== "undefined") {
-    return localStorage.getItem("token");
+  try {
+    if (typeof window === "undefined") return null;
+    
+    const token = sessionStorage.getItem("token");
+    if (!token) return null;
+
+    // Validate token format
+    if (!token.match(/^[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]*$/)) {
+      sessionStorage.removeItem("token");
+      return null;
+    }
+
+    const [header, payload, signature] = token.split('.');
+    
+    // Validate header and payload are valid base64
+    try {
+      const decodedHeader = JSON.parse(atob(header));
+      const decodedPayload = JSON.parse(atob(payload));
+
+      // Check token algorithm
+      if (!decodedHeader.alg) throw new Error('Invalid token algorithm');
+
+      // Check required claims
+      if (!decodedPayload.exp || !decodedPayload.iat) {
+        throw new Error('Missing required claims');
+      }
+
+      // Check token expiration with 5 second buffer
+      if (Date.now() >= (decodedPayload.exp * 1000) - 5000) {
+        throw new Error('Token expired');
+      }
+
+      return token;
+    } catch (error) {
+      console.error('Token validation failed:', error);
+      sessionStorage.removeItem("token");
+      return null;
+    }
+  } catch (error) {
+    console.error('Token retrieval failed:', error);
+    return null;
   }
-  return null;
 };
 
 // Remove token from localStorage
 export const removeToken = () => {
   if (typeof window !== "undefined") {
-    localStorage.removeItem("token");
+    sessionStorage.removeItem("token");
   }
 };
 
 // Register a new user
-export const registerUser = (email: string, password: string) => {
+export const registerUser = async (
+  email: string,
+  password: string,
+  username: string
+) => {
   try {
-    // Check if user already exists
-    const existingUser = MOCK_USERS.find((user) => user.email === email);
-    if (existingUser) {
-      return { success: false, message: "User already exists" };
+    const response = await fetch("http://localhost:5000/api/auth/register", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ email, password, username }),
+    });
+
+    const data = await response.json();
+
+    if (!data.success) {
+      return { success: false, message: data.message || "Registration failed" };
     }
-
-    // Add user to mock database
-    MOCK_USERS.push({ email, password });
-
-    // For debugging
-    console.log("Registered user:", email);
-    console.log("Current users:", MOCK_USERS);
 
     return { success: true, message: "User registered successfully" };
   } catch (error) {
@@ -49,34 +87,25 @@ export const registerUser = (email: string, password: string) => {
 };
 
 // Login a user
-export const loginUser = (email: string, password: string) => {
+export const loginUser = async (email: string, password: string) => {
   try {
-    // For debugging
-    console.log("Login attempt:", email);
-    console.log("Current users:", MOCK_USERS);
+    const response = await fetch("http://localhost:5000/api/auth/login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ email, password }),
+    });
 
-    // Check if user exists and password matches
-    const user = MOCK_USERS.find(
-      (user) => user.email === email && user.password === password
-    );
+    const data = await response.json();
 
-    // For testing purposes, allow any login if no users exist
-    if (MOCK_USERS.length === 0 || user) {
-      // Generate a simple token
-      const token = btoa(`${email}:${Date.now()}`);
-      setToken(token);
-
-      return {
-        success: true,
-        message: "Login successful",
-        token,
-        user: { email },
-      };
+    if (!data.success) {
+      return { success: false, message: data.message || "Login failed invalid credentials" };
     }
 
-    return { success: false, message: "Invalid credentials" };
+    setToken(data.data);
+    return { success: true, message: "Login successful", token: data.token };
   } catch (error) {
-    console.error("Login error:", error);
     return { success: false, message: "Failed to login" };
   }
 };

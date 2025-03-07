@@ -2,12 +2,12 @@
 
 import type React from "react";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { toast } from "sonner";
+import { toast, Toaster } from "sonner";
 import { loginUser } from "@/lib/auth";
 
 export default function LoginPage() {
@@ -15,6 +15,13 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
+
+  useEffect(() => {
+    const token = sessionStorage.getItem('token');
+    if (token) {
+      router.push('/home');
+    }
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -27,7 +34,7 @@ export default function LoginPage() {
     setIsLoading(true);
 
     try {
-      const result = loginUser(email, password);
+      const result = await loginUser(email, password);
 
       if (result.success) {
         toast.success("You have been logged in successfully");
@@ -80,7 +87,7 @@ export default function LoginPage() {
 
           <Button
             type="submit"
-            className="w-full bg-orange-500 hover:bg-orange-600"
+            className="w-full bg-orange-500 hover:bg-orange-600 cursor-pointer"
             disabled={isLoading}
           >
             {isLoading ? "Logging in..." : "Submit"}
@@ -90,7 +97,7 @@ export default function LoginPage() {
         <div className="mt-4 text-center text-sm text-gray-500">
           <p>
             Don&apos;t have an account?{" "}
-            <Link href="/signup" className="text-orange-500 hover:underline">
+            <Link href="/signup" className="text-orange-500 hover:underline cursor-pointer">
               Sign up
             </Link>
           </p>
@@ -105,6 +112,7 @@ export default function LoginPage() {
           WhatsApp.
         </div>
       </div>
+      <Toaster position="top-center" />
     </div>
   );
 }
