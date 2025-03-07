@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "42 - Financial Services",
+  title: "IncredMoney - Team42",
   description: "Diversify with confidence with InCred Money financial services",
 };
 
@@ -32,31 +32,3 @@ export default function RootLayout({
     </html>
   );
 }
-
-// import type React from "react";
-// import type { Metadata } from "next";
-// import { Inter } from "next/font/google";
-// import "./globals.css";
-// import { Toaster } from "sonner";
-
-// const inter = Inter({ subsets: ["latin"] });
-
-// export const metadata: Metadata = {
-//   title: "42 - Financial Services",
-//   description: "Diversify with confidence with nDeed Money financial services",
-// };
-
-// export default function RootLayout({
-//   children,
-// }: Readonly<{
-//   children: React.ReactNode;
-// }>) {
-//   return (
-//     <html lang="en">
-//       <body className={inter.className}>
-//         {children}
-//         <Toaster position="top-center" />
-//       </body>
-//     </html>
-//   );
-// }

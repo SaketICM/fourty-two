@@ -209,7 +209,7 @@ export default function HomePage() {
               <div className="text-orange-500">✓</div>
             </div>
             <span className="text-xl font-bold">
-              <span className="text-blue-600">team</span>
+              <span className="text-blue-600">Team</span>
               <span className="text-orange-500">42</span>
             </span>
           </div>
@@ -234,7 +234,7 @@ export default function HomePage() {
               <Link href={''} onClick={() => setcurrentState("create_post")}>Create Post</Link>
             </TabsTrigger>
             <TabsTrigger value="old_post" className="relative" asChild>
-              <Link href={''} onClick={() => setcurrentState("old_post")}>Old Post</Link>
+              <Link href={''} onClick={() => setcurrentState("old_post")}>Old Posts</Link>
             </TabsTrigger>
           </TabsList>
         </Tabs>
