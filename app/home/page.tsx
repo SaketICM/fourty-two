@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { getToken } from "@/lib/auth";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -13,15 +13,24 @@ import {
 } from "@/components/ui/card";
 import { toast } from "sonner";
 import { ChartNoAxesColumn, Heart, Send } from "lucide-react";
+import { LinkedInPost } from "./components/linkedin-post";
+import { InstagramPost } from "./components/instagram-post";
+import { TwitterPost } from "./components/twitter-post";
+import Image from "next/image";
+import { Textarea } from "@/components/ui/textarea";
+import { Search } from "lucide-react";
 
-interface Article {
-  id: number;
-  date: string;
-  title: string;
-}
+export type Article = {
+  id: string;
+  image: string;
+  text: string;
+  citation: string;
+};
 
 export default function HomePage() {
   const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const [searchQuery, setSearchQuery] = useState("");
 
   const [editMode, setEditMode] = useState(false);
@@ -33,34 +42,46 @@ export default function HomePage() {
   // Mock articles data
   const articles: Article[] = [
     {
-      id: 1,
-      date: "Feb 14, 2025",
-      title: "Trends in retail investors shifting from stocks to bonds",
+      id: "87y",
+      image:
+        "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800",
+      text: "Excited to share that I've just completed a major redesign project forour flagship product! 🎉Excited to share that I've just completed a major redesign project forour flagship product! 🎉Excited to share that I've just completed a major redesign project forour flagship product! 🎉Excited to share that I've just completed a major redesign project forour flagship product! 🎉Excited to share that I've just completed a major redesign project forour flagship product! 🎉",
+      citation: "Trends in retail investors shifting from stocks to bonds",
     },
     {
-      id: 2,
-      date: "Feb 14, 2025",
-      title: "Trends in retail investors shifting from stocks to bonds",
+      id: "98",
+      image:
+        "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800",
+      text: "Excited to share that I've just completed a major redesign project forour flagship product! 🎉",
+      citation: "Trends in retail investors shifting from stocks to bonds",
     },
     {
-      id: 3,
-      date: "Feb 14, 2025",
-      title: "Trends in retail investors shifting from stocks to bonds",
+      id: "09oji",
+      image:
+        "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800",
+      text: "Excited to share that I've just completed a major redesign project forour flagship product! 🎉",
+      citation: "Trends in retail investors shifting from stocks to bonds",
     },
     {
-      id: 4,
-      date: "Feb 14, 2025",
-      title: "Trends in retail investors shifting from stocks to bonds",
+      id: "09oi",
+      image:
+        "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800",
+      text: "Excited to share that I've just completed a major redesign project forour flagship product! 🎉",
+      citation: "Trends in retail investors shifting from stocks to bonds",
     },
     {
-      id: 5,
-      date: "Feb 14, 2025",
-      title: "Trends in retail investors shifting from stocks to bonds",
+      id: "09o978i",
+      image:
+        "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800",
+      text: "Excited to share that I've just completed a major redesign project forour flagship product! 🎉",
+      citation: "Trends in retail investors shifting from stocks to bonds",
     },
     {
-      id: 6,
-      date: "Feb 14, 2025",
-      title: "Trends in retail investors shifting from stocks to bonds",
+      id: "98oi",
+      image:
+        "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800",
+      text: "Excited to share that I've just completed a major redesign project forour flagship product! 🎉",
+      citation: "Trends in retail investors shifting from stocks to bonds",
     },
   ];
 
@@ -80,8 +101,12 @@ export default function HomePage() {
     router.push("/login");
   };
 
+  const handleNavigation = (query = {}) => {
+    router.push(`${pathname}?${new URLSearchParams(query).toString()}`);
+  };
+
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white max-w-7xl mx-auto">
       <header className="border-b py-4">
         <div className="container mx-auto flex items-center justify-between px-4">
           <div className="flex items-center">
@@ -93,107 +118,152 @@ export default function HomePage() {
               <span className="text-orange-500">Money</span>
             </span>
           </div>
-          <Button variant="ghost" onClick={handleLogout} className="cursor-pointer">
+          <Button
+            variant="ghost"
+            onClick={handleLogout}
+            className="cursor-pointer"
+          >
             Logout
           </Button>
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-8">
-        <div className="mb-12 text-center">
-          <h2 className="mb-2 text-4xl font-bold">Diversify with confidence</h2>
-          <p className="text-gray-600">
-            Robust financial products for your satellite investments.
-          </p>
+      <div className="flex gap-6 justify-center pb-2 my-16">
+        <div>
+          <h3
+            className={`text-md cursor-pointer ${
+              searchParams.get("page") === "create_post"
+                ? "text-red-600 bg-red-200 rounded-md px-2 py-1"
+                : "text-black py-1"
+            }`}
+            onClick={() => handleNavigation({ page: "create_post" })}
+          >
+            Create Post
+          </h3>
         </div>
+        <div>
+          <h3
+            className={`text-md cursor-pointer ${
+              searchParams.get("page") === "old_post"
+                ? "text-red-600 bg-red-200 rounded-md px-2 py-1"
+                : "text-black py-1"
+            }`}
+            onClick={() => handleNavigation({ page: "old_post" })}
+          >
+            Old Post
+          </h3>
+        </div>
+      </div>
 
-        <div className="mb-12 flex justify-center">
-          <div className="relative w-full max-w-md">
-            <Input
-              type="text"
-              placeholder="Hinted search text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pr-10 rounded-full"
-            />
+      <main className="container mx-auto px-4 py-8">
+        {searchParams.get("page") === "create_post" && (
+          <div>
+            <div className="mb-12 text-center">
+              <h2 className="mb-2 text-4xl font-bold">
+                Diversify with confidence
+              </h2>
+              <p className="text-gray-600">
+                Robust financial products for your satellite investments.
+              </p>
+            </div>
+
+            <div className="mb-12 flex justify-center">
+              <div className="relative w-full max-w-md">
+                <Input
+                  type="text"
+                  placeholder="Hinted search text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pr-10 rounded-full"
+                />
+                <div className="absolute inset-y-0 h-9 text-gray-400 right-0 flex items-center pr-3">
+                  <Search />
+                </div>
+              </div>
+            </div>
           </div>
-        </div>
+        )}
 
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
           {articles.map((article) => (
             <Card key={article.id} className="overflow-hidden p-4">
-              <img />
-              <CardContent className="flex">
-                <CardHeader className="p-4">
-                  <div className="flex justify-center">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-16 w-16 text-gray-800"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="1"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <rect x="2" y="6" width="20" height="12" rx="2" />
-                      <circle cx="12" cy="12" r="2" />
-                      <path d="M6 12h.01M18 12h.01" />
-                    </svg>
-                  </div>
-                </CardHeader>
-                <h3 className="font-medium m-5">{article.title}</h3>
+              <CardHeader className="p-4">
+                <div className="flex justify-center">
+                  <Image
+                    height={200}
+                    width={200}
+                    className="w-full rounded-lg"
+                    alt="News Image"
+                    src={article.image}
+                  />
+                </div>
+              </CardHeader>
+              <CardContent className="text-center px-2">
+                <Textarea
+                  className="mb-2 text-sm text-gray-500 overflow-y-auto h-[120px]"
+                  defaultValue={article.text}
+                ></Textarea>
               </CardContent>
-              <CardFooter className="flex justify-center pb-4"></CardFooter>
+              <CardFooter className="flex justify-center gap-4 pb-4">
+                {searchParams.get("page") === "create_post" ? (
+                  <div className="gap-4 flex">
+                    <LinkedInPost article={article} />
+                    <InstagramPost article={article} />
+                    <TwitterPost article={article} />
+                  </div>
+                ) : (
+                  <div>
+                    <div className="flex justify-left">
+                      <div className="flex items-center ml-8 my-5">
+                        <Heart className="cursor-pointer" />
+                        <input
+                          type="input"
+                          value={likes}
+                          readOnly={!editMode}
+                          onChange={(e) => setLikes(Number(e.target.value))}
+                          className="max-w-14 ml-2 text-lg focus:outline-0"
+                        />
+                      </div>
 
-              <div className="flex justify-left">
-                <div className="flex items-center ml-8 my-5">
-                  <Heart className="cursor-pointer" />
-                  <input
-                    type="input"
-                    value={likes}
-                    readOnly={!editMode}
-                    onChange={(e) => setLikes(Number(e.target.value))}
-                    className="max-w-14 ml-2 text-lg focus:outline-0"
-                  />
-                </div>
+                      <div className="flex items-center my-5 ml-5">
+                        <Send className="cursor-pointer" />
+                        <input
+                          type="input"
+                          value={reach}
+                          readOnly={!editMode}
+                          onChange={(e) => setReach(Number(e.target.value))}
+                          className="max-w-14 ml-2 text-lg focus:outline-0"
+                        />
+                      </div>
 
-                <div className="flex items-center my-5 ml-5">
-                  <Send className="cursor-pointer" />
-                  <input
-                    type="input"
-                    value={reach}
-                    readOnly={!editMode}
-                    onChange={(e) => setReach(Number(e.target.value))}
-                    className="max-w-14 ml-2 text-lg focus:outline-0"
-                  />
-                </div>
-
-                <div className="flex items-center my-5 ml-5">
-                  <ChartNoAxesColumn className="cursor-pointer" />
-                  <input
-                    type="input"
-                    value={impressions}
-                    readOnly={!editMode}
-                    onChange={(e) => setImpressions(Number(e.target.value))}
-                    className="max-w-14 ml-2 text-lg focus:outline-0"
-                  />
-                </div>
-              </div>
-
-              <CardFooter className="flex justify-start gap-4 p-4">
-                <Button
-                  variant="outline"
-                  className="px-20 py-4 rounded-xl cursor-pointer"
-                  size="sm"
-                  onClick={() => setEditMode(!editMode)}
-                >
-                  {`${editMode ? 'Cancel' : 'Edit'}`}
-                </Button>
-
-                <Button className="px-20 py-4 rounded-xl" size="sm">
-                  Submit
-                </Button>
+                      <div className="flex items-center my-5 ml-5">
+                        <ChartNoAxesColumn className="cursor-pointer" />
+                        <input
+                          type="input"
+                          value={impressions}
+                          readOnly={!editMode}
+                          onChange={(e) =>
+                            setImpressions(Number(e.target.value))
+                          }
+                          className="max-w-14 ml-2 text-lg focus:outline-0"
+                        />
+                      </div>
+                    </div>
+                    <div className="flex justify-between">
+                      <Button
+                        variant="outline"
+                        className="px-16 py-4 rounded-xl cursor-pointer"
+                        size="sm"
+                        onClick={() => setEditMode(!editMode)}
+                      >
+                        {`${editMode ? "Cancel" : "Edit"}`}
+                      </Button>
+                      <Button className="px-16 py-4 rounded-xl" size="sm">
+                        Submit
+                      </Button>
+                    </div>
+                  </div>
+                )}
               </CardFooter>
             </Card>
           ))}
