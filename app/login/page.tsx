@@ -17,9 +17,9 @@ export default function LoginPage() {
   const router = useRouter();
 
   useEffect(() => {
-    const token = sessionStorage.getItem('token');
+    const token = sessionStorage.getItem("token");
     if (token) {
-      router.push('/home');
+      router.push("/home");
     }
   }, []);
 
@@ -58,8 +58,8 @@ export default function LoginPage() {
               <div className="text-orange-500">✓</div>
             </div>
             <span className="text-xl font-bold">
-              <span className="text-blue-600">InCred</span>
-              <span className="text-orange-500">Money</span>
+              <span className="text-blue-600">team</span>
+              <span className="text-orange-500">42</span>
             </span>
           </div>
         </div>
@@ -97,7 +97,10 @@ export default function LoginPage() {
         <div className="mt-4 text-center text-sm text-gray-500">
           <p>
             Don&apos;t have an account?{" "}
-            <Link href="/signup" className="text-orange-500 hover:underline cursor-pointer">
+            <Link
+              href="/signup"
+              className="text-orange-500 hover:underline cursor-pointer"
+            >
               Sign up
             </Link>
           </p>
