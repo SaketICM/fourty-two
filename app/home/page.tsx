@@ -120,6 +120,8 @@ export default function HomePage() {
       }
 
       setIsPostSuccess(true);
+      setIsSummarised(false);
+      setIsImageGenerated(false);
       setArticles([]);
       toast.success("Social Media post processed succesfully!");
       getAllPosts().then((data) => {
