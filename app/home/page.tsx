@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { getAllPosts, getToken, updatePostMeta } from "@/lib/auth";
 import { Input } from "@/components/ui/input";
@@ -380,9 +380,9 @@ export default function HomePage() {
         {currentState !== "old_post" && (
           <div>
             <div className="mb-12 mt-40 text-center">
-              <h2 className="mb-2 text-4xl font-bold bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text text-transparent">
-                Leave the ordinary behind
-              </h2>
+              <h2
+                className="mb-2 text-4xl font-bold bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text text-transparent"
+              >Leave the ordinary behind</h2>
               <p className="text-gray-600">
                 Create you next social media post with AI
               </p>
@@ -399,12 +399,11 @@ export default function HomePage() {
                   onKeyDown={(e) => {
                     if (e.key === "Enter") {
                       handleTextCall(e);
-                      console.log(e, "1");
                     }
                   }}
                 />
                 <div className="absolute inset-y-0 h-9 text-gray-400 right-0 flex items-center pr-3">
-                  <Search />
+                  <Search size={20} />
                 </div>
               </div>
             </div>
@@ -440,28 +439,28 @@ export default function HomePage() {
                     ></Textarea>
                   </CardContent>
                   <CardFooter className="flex justify-center gap-4 pb-4">
-                      <div className="gap-3 flex">
-                        <LinkedInPost article={article} />
-                        {/* <InstagramPost article={article} /> */}
-                        <TwitterPost article={article} />
-                        <Button
-                          variant="default"
-                          className="text-xs cursor-pointer"
-                          size="sm"
-                          onClick={async () => {
-                            await summarisedResponse(article?.id);
-                          }}
-                        >
-                          {isSummaryLoading ? (
-                            <>
-                              <Loader2 className="h-4 w-4 animate-spin" />
-                              Summarizing...
-                            </>
-                          ) : (
-                            "Summarize"
-                          )}
-                        </Button>
-                      </div>}
+                    <div className="gap-3 flex">
+                      <LinkedInPost article={article} />
+                      {/* <InstagramPost article={article} /> */}
+                      <TwitterPost article={article} />
+                      <Button
+                        variant="default"
+                        className="text-xs cursor-pointer"
+                        size="sm"
+                        onClick={async () => {
+                          await summarisedResponse(article?.id);
+                        }}
+                      >
+                        {isSummaryLoading ? (
+                          <>
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                            Summarizing...
+                          </>
+                        ) : (
+                          "Summarize"
+                        )}
+                      </Button>
+                    </div>
                   </CardFooter>
                 </Card>
               ))}
@@ -471,8 +470,8 @@ export default function HomePage() {
             {isLoading && (
               <Loader2 className="mt-8 absolute left-1/2 top-1/2 w-10 animate-spin" />
             )}
-            {articles &&
-              articles.map((article) => (
+            {oldArticles && oldArticles.length > 0 ?
+              oldArticles.map((article) => (
                 <Card key={article?.id} className="overflow-hidden p-4">
                   <CardHeader className="p-4">
                     <div className="flex justify-center">
@@ -584,7 +583,7 @@ export default function HomePage() {
                     </div>
                   </CardFooter>
                 </Card>
-              ))}
+              )) : <p className="text-3xl font-semibold flex items-center mt-6">You have no older posts</p>}
           </div>
         )}
       </main>
