@@ -12,7 +12,7 @@ import {
   CardHeader,
 } from "@/components/ui/card";
 import { toast } from "sonner";
-import { ChartNoAxesColumn, Heart, Send } from "lucide-react";
+import { ChartNoAxesColumn, Heart, Loader, Loader2, Send } from "lucide-react";
 import { LinkedInPost } from "./components/linkedin-post";
 import { InstagramPost } from "./components/instagram-post";
 import { TwitterPost } from "./components/twitter-post";
@@ -21,12 +21,14 @@ import { Textarea } from "@/components/ui/textarea";
 import { Search } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Link from "next/link";
+import { Toaster } from "@/components/ui/sonner";
+import removeMarkdown from "remove-markdown";
 
 export type Article = {
   id: string;
-  image: string;
+  image?: string;
   text: string;
-  citation: string;
+  citation?: string;
   meta: {
     likes: number;
     reach: number;
@@ -40,6 +42,8 @@ export default function HomePage() {
   const searchParams = useSearchParams();
   const [searchQuery, setSearchQuery] = useState("");
   const [currentState, setcurrentState] = useState("create_post");
+  const [isLoading, setIsLoading] = useState(false);
+  const [isSummaryLoading, setIsSummaryLoading] = useState(false);
 
   const [articles, setArticles] = useState<Article[] | null>(null);
   const [editStates, setEditStates] = useState<{ [key: string]: boolean }>({});
@@ -71,6 +75,129 @@ export default function HomePage() {
           },
         },
       }));
+    }
+  };
+
+  // Fetch news with keywords
+  const textKeywords = async (text: string) => {
+    try {
+      setIsLoading(true);
+
+      const response = await fetch("http://localhost:5000/users/prompts/text", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${getToken()}`,
+        },
+        body: JSON.stringify({ text }),
+      });
+
+      const data = await response.json();
+
+      setIsLoading(false);
+
+      console.log("93 : ", data);
+
+      if (!data.success) {
+        return {
+          success: false,
+          message: data.message || "Unable to fetch data for the keyword(s)",
+        };
+      }
+
+      return {
+        success: true,
+        message: "Data fetched successfully",
+        data: data.data,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: "Unable to fetch data for the keyword(s)",
+      };
+    }
+  };
+
+  // Fetch news with keywords
+  const summarisedResponse = async (_id: string) => {
+    try {
+      setIsSummaryLoading(true);
+      const response = await fetch(
+        `http://localhost:5000/users/prompts/text/${_id}/summarize`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${getToken()}`,
+          },
+        }
+      );
+
+      const data = await response.json();
+
+      const updatedArticle = articles?.map((article) => ({
+        ...article,
+        text: article.id === data.data._id ? data?.data?.summary : article.text,
+      }));
+
+      if (updatedArticle) {
+        setArticles(updatedArticle);
+      }
+
+      setIsSummaryLoading(false);
+
+      if (!data.success) {
+        return {
+          success: false,
+          message: data.message || "Unable to fetch summarize data",
+        };
+      }
+
+      return {
+        success: true,
+        message: "Data fetched successfully",
+        token: data.token,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: "Unable to fetch summarize data",
+      };
+    }
+  };
+
+  const handleTextCall = async (e: React.FormEvent) => {
+    e.preventDefault();
+    console.log(searchQuery, "2");
+
+    if (!searchQuery) {
+      toast.error("Please fill in all fields");
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      const result: any = await textKeywords(searchQuery);
+
+      if (result.success) {
+        toast.success("Data fetch Successfully");
+
+        const formattedData = result?.data?.choices?.map((choice: any) => ({
+          id: result.data._id,
+          text: removeMarkdown(choice.message.content),
+        }));
+        setArticles(formattedData);
+      } else {
+        toast.error(
+          result.message || "Unable to fetch data for the keyword(s)"
+        );
+      }
+    } catch (error) {
+      console.log(error);
+      toast.error("Something went wrong. Please try again.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -196,10 +323,9 @@ export default function HomePage() {
     router.push("/login");
   };
 
-  const handleNavigation = (query = {}) => {
-    router.push(`${pathname}?${new URLSearchParams(query).toString()}`);
-  };
-
+  // if (isLoading) {
+  //   return <Loader2 className="absolute left-1/2 top-1/2 w-10 animate-spin" />;
+  // }
   return (
     <div className="min-h-screen bg-white max-w-7xl mx-auto">
       <header className="border-b py-4">
@@ -237,7 +363,7 @@ export default function HomePage() {
             </TabsTrigger>
             <TabsTrigger value="old_post" className="relative" asChild>
               <Link href={""} onClick={() => setcurrentState("old_post")}>
-                Old Posts
+                Old Post
               </Link>
             </TabsTrigger>
           </TabsList>
@@ -261,9 +387,10 @@ export default function HomePage() {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="pr-10 rounded-full"
-                  onKeyPress={(e) => {
+                  onKeyDown={(e) => {
                     if (e.key === "Enter") {
-                      handleNavigation({ search: searchQuery });
+                      handleTextCall(e);
+                      console.log(e, "1");
                     }
                   }}
                 />
@@ -276,32 +403,55 @@ export default function HomePage() {
         )}
 
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {isLoading && (
+            <Loader2 className="absolute left-1/2 top-1/2 w-10 animate-spin" />
+          )}
           {articles &&
             articles.map((article) => (
               <Card key={article.id} className="overflow-hidden p-4">
                 <CardHeader className="p-4">
                   <div className="flex justify-center">
-                    <Image
-                      height={200}
-                      width={200}
-                      className="w-full rounded-lg"
-                      alt="News Image"
-                      src={article.image}
-                    />
+                    {article.image && (
+                      <Image
+                        height={200}
+                        width={200}
+                        className="w-full rounded-lg"
+                        alt="News Image"
+                        src={article?.image}
+                      />
+                    )}
                   </div>
                 </CardHeader>
                 <CardContent className="text-center px-2">
                   <Textarea
                     className="mb-2 text-sm text-gray-500 overflow-y-auto h-[120px]"
-                    defaultValue={article.text}
+                    readOnly
+                    value={article?.text}
                   ></Textarea>
                 </CardContent>
                 <CardFooter className="flex justify-center gap-4 pb-4">
                   {searchParams.get("page") !== "old_post" ? (
-                    <div className="gap-4 flex">
+                    <div className="gap-1 flex">
                       <LinkedInPost article={article} />
-                      <InstagramPost article={article} />
+                      {/* <InstagramPost article={article} /> */}
                       <TwitterPost article={article} />
+                      <Button
+                        variant="default"
+                        className="text-xs"
+                        size="sm"
+                        onClick={async () => {
+                          await summarisedResponse(article?.id);
+                        }}
+                      >
+                        {isSummaryLoading ? (
+                          <>
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            Summarizing...
+                          </>
+                        ) : (
+                          "Summarize"
+                        )}
+                      </Button>
                     </div>
                   ) : (
                     <div>
@@ -313,8 +463,8 @@ export default function HomePage() {
                             value={
                               editStates[article.id]
                                 ? articleValues[article.id]?.meta?.likes ??
-                                  article.meta.likes
-                                : article.meta.likes
+                                  article.meta?.likes
+                                : article.meta?.likes
                             }
                             className="max-w-14 ml-2 text-lg focus:outline-0"
                             readOnly={!editStates[article.id]}
@@ -397,6 +547,7 @@ export default function HomePage() {
             ))}
         </div>
       </main>
+      <Toaster position="top-center" />
     </div>
   );
 }
