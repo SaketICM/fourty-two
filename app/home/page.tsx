@@ -122,6 +122,13 @@ export default function HomePage() {
       setIsPostSuccess(true);
       setArticles([]);
       toast.success("Social Media post processed succesfully!");
+      getAllPosts().then((data) => {
+        if (data?.success) {
+          setoldArticles(data?.posts);
+        } else {
+          setoldArticles([]);
+        }
+      });
 
       return {
         success: true,
