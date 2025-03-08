@@ -64,9 +64,8 @@ export default function SignupPage() {
             <div className="mr-2 flex h-8 w-8 items-center justify-center border-2 border-blue-600">
               <div className="text-orange-500">✓</div>
             </div>
-            <span className="text-xl font-bold">
-              <span className="text-blue-600">team</span>
-              <span className="text-orange-500">42</span>
+            <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-orange-500 bg-clip-text text-transparent">
+              Team42
             </span>
           </div>
         </div>
