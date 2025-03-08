@@ -149,6 +149,7 @@ export default function HomePage() {
   const textKeywords = async (text: string) => {
     try {
       setIsLoading(true);
+      setIsPostSuccess(false);
 
       const response = await fetch(
         "https://team42.incredmoney.com/users/prompts/text",
