@@ -84,7 +84,7 @@ export default function HomePage() {
       setIsLoading(true);
 
       const response = await fetch(
-        "https://team42.incredmoney.com/api/users/prompts/text",
+        "https://team42.incredmoney.com/users/prompts/text",
         {
           method: "POST",
           headers: {
@@ -126,7 +126,7 @@ export default function HomePage() {
     try {
       setIsSummaryLoading(true);
       const response = await fetch(
-        `https://team42.incredmoney.com/api/users/prompts/text/${_id}/summarize`,
+        `https://team42.incredmoney.com/users/prompts/text/${_id}/summarize`,
         {
           method: "GET",
           headers: {
@@ -407,14 +407,14 @@ export default function HomePage() {
 
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
           {isLoading && (
-            <Loader2 className="absolute left-1/2 top-1/2 w-10 animate-spin" />
+            <Loader2 className="mt-8 absolute left-1/2 top-1/2 w-10 animate-spin" />
           )}
           {articles &&
             articles.map((article) => (
               <Card key={article.id} className="overflow-hidden p-4">
                 <CardHeader className="p-4">
                   <div className="flex justify-center">
-                    {article.image && (
+                    {article?.image && (
                       <Image
                         height={200}
                         width={200}
@@ -434,13 +434,13 @@ export default function HomePage() {
                 </CardContent>
                 <CardFooter className="flex justify-center gap-4 pb-4">
                   {searchParams.get("page") !== "old_post" ? (
-                    <div className="gap-1 flex">
+                    <div className="gap-3 flex">
                       <LinkedInPost article={article} />
                       {/* <InstagramPost article={article} /> */}
                       <TwitterPost article={article} />
                       <Button
                         variant="default"
-                        className="text-xs"
+                        className="text-xs cursor-pointer"
                         size="sm"
                         onClick={async () => {
                           await summarisedResponse(article?.id);
@@ -448,7 +448,7 @@ export default function HomePage() {
                       >
                         {isSummaryLoading ? (
                           <>
-                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            <Loader2 className="h-4 w-4 animate-spin" />
                             Summarizing...
                           </>
                         ) : (

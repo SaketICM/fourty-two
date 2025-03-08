@@ -81,7 +81,7 @@ export const LinkedInPost = ({ article }: LinkedInPostProps) => {
               {article.text}
               <br />
               <button
-                className="text-blue-500"
+                className="text-blue-500 cursor-pointer"
                 onClick={() => setShowFullText(false)}
               >
                 Read less
@@ -92,7 +92,7 @@ export const LinkedInPost = ({ article }: LinkedInPostProps) => {
               {article.text.substring(0, 200)}
               <br />
               <button
-                className="text-blue-500"
+                className="text-blue-500 cursor-pointer"
                 onClick={() => setShowFullText(true)}
               >
                 Read more
@@ -114,7 +114,7 @@ export const LinkedInPost = ({ article }: LinkedInPostProps) => {
         {/* </CardContent>
         </Card> */}
         <DialogFooter>
-          <Button type="submit">Post</Button>
+          <Button type="submit" className="cursor-pointer">Post</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

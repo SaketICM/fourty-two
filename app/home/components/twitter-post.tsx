@@ -115,7 +115,7 @@ export const TwitterPost = ({ article }: TwitterPostProps) => {
                       {article.text}
                       <br />
                       <button
-                        className="text-blue-500"
+                        className="text-blue-500 cursor-pointer"
                         onClick={() => setShowFullText(false)}
                       >
                         Read less
@@ -126,7 +126,7 @@ export const TwitterPost = ({ article }: TwitterPostProps) => {
                       {article.text.substring(0, 200)}
                       <br />
                       <button
-                        className="text-blue-500"
+                        className="text-blue-500 cursor-pointer"
                         onClick={() => setShowFullText(true)}
                       >
                         Read more
@@ -141,7 +141,7 @@ export const TwitterPost = ({ article }: TwitterPostProps) => {
                   <img
                     src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800"
                     alt="Design Project"
-                    className="w-full h-auto object-cover"
+                    className="w-full h-auto object-cover cursor-pointer"
                   />
                 </div>
               </div>
@@ -149,7 +149,7 @@ export const TwitterPost = ({ article }: TwitterPostProps) => {
           </div>
         </div>
         <DialogFooter>
-          <Button type="submit">Post</Button>
+          <Button type="submit" className="cursor-pointer">Post</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
