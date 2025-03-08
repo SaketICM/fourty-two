@@ -40,9 +40,10 @@ import {
 
 type LinkedInPostProps = {
   article: Article;
+  func: (value: Article) => void;
 };
 
-export const LinkedInPost = ({ article }: LinkedInPostProps) => {
+export const LinkedInPost = ({ article, func }: LinkedInPostProps) => {
   const [post, setPost] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -103,18 +104,26 @@ export const LinkedInPost = ({ article }: LinkedInPostProps) => {
           <br />
           {article.citation}
         </p>
-        {article?.image && <Image
-          src={article.image}
-          alt="Project Preview"
-          className="w-full rounded-lg"
-          height={250}
-          width={250}
-        />}
+        {article?.image && (
+          <Image
+            src={article.image}
+            alt="Project Preview"
+            className="w-full rounded-lg"
+            height={250}
+            width={250}
+          />
+        )}
 
         {/* </CardContent>
         </Card> */}
         <DialogFooter>
-          <Button type="submit" className="cursor-pointer">Post</Button>
+          <Button
+            type="submit"
+            className="cursor-pointer"
+            onClick={() => func(article)}
+          >
+            Post
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

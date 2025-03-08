@@ -35,6 +35,7 @@ export type Article = {
   image?: string;
   text: string;
   citation?: string;
+  summary?: string;
   meta: {
     likes: number;
     reach: number;
@@ -53,7 +54,7 @@ export default function HomePage() {
   const [isImageLoading, setIsImageLoading] = useState(false);
   const [isImageGenerated, setIsImageGenerated] = useState(false);
   const [isSummarised, setIsSummarised] = useState(false);
-
+  const [isPostSuccess, setIsPostSuccess] = useState(false);
   const [articles, setArticles] = useState<Article[] | null>(null);
   const [oldArticles, setoldArticles] = useState<Article[] | null>();
   const [editStates, setEditStates] = useState<{ [key: string]: boolean }>({});
@@ -81,6 +82,7 @@ export default function HomePage() {
           id: "",
           image: "",
           text: "",
+          summary: "",
           citation: "",
           meta: {
             likes: 0,
@@ -89,6 +91,56 @@ export default function HomePage() {
           },
         },
       }));
+    }
+  };
+
+  // post LinkendIn
+  const postOnSocialMedia = async (article: Article) => {
+    try {
+      setIsLoading(true);
+
+      const response = await fetch(
+        "https://team42.incredmoney.com/users/posts/",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${getToken()}`,
+          },
+          body: JSON.stringify({
+            promptId: article?.id,
+            text: article?.text,
+            image: article?.image,
+            summary: article?.summary,
+          }),
+        }
+      );
+
+      const data = await response.json();
+
+      setIsLoading(false);
+
+      if (!data.success) {
+        return {
+          success: false,
+          message: data.message || "Unable to fetch data for the keyword(s)",
+        };
+      }
+
+      setIsPostSuccess(true);
+      setArticles([]);
+      toast.success("Social Media post processed succesfully!");
+
+      return {
+        success: true,
+        message: "Data fetched successfully",
+        data: data.data,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: "Unable to fetch data for the keyword(s)",
+      };
     }
   };
 
@@ -150,9 +202,11 @@ export default function HomePage() {
 
       const data = await response.json();
 
+      console.log("Data : ", data);
+
       const updatedArticle = articles?.map((article) => ({
         ...article,
-        text: article.id === data.data._id ? data?.data?.summary : article.text,
+        summary: data?.data?.summarizedText ?? "",
       }));
 
       if (updatedArticle) {
@@ -171,7 +225,7 @@ export default function HomePage() {
       return {
         success: true,
         message: "Data fetched successfully",
-        token: data.token,
+        data: data.data?.summarizedText,
       };
     } catch (error) {
       return {
@@ -389,6 +443,9 @@ export default function HomePage() {
   // if (isLoading) {
   //   return <Loader2 className="absolute left-1/2 top-1/2 w-10 animate-spin" />;
   // }
+
+  console.log("Articles", articles);
+
   return (
     <div className="min-h-screen bg-white max-w-7xl mx-auto">
       <header className="border-b py-4">
@@ -488,19 +545,35 @@ export default function HomePage() {
                     </div>
                   </CardHeader>
                   <CardContent className="text-center px-2">
-                    <Textarea
-                      className="mb-2 text-sm text-gray-500 overflow-y-auto h-[120px]"
-                      readOnly
-                      value={article?.text}
-                    ></Textarea>
+                    {article?.summary ? (
+                      <Textarea
+                        className="mb-2 text-sm text-gray-500 overflow-y-auto h-[120px]"
+                        readOnly
+                        value={article?.summary}
+                      ></Textarea>
+                    ) : (
+                      <Textarea
+                        className="mb-2 text-sm text-gray-500 overflow-y-auto h-[120px]"
+                        readOnly
+                        value={article?.text}
+                      ></Textarea>
+                    )}
                   </CardContent>
                   <CardFooter className="flex justify-center gap-4 pb-4">
                     <div className="gap-3 flex">
-                      {isSummarised && isImageGenerated && (
+                      {isSummarised && isImageGenerated && !isPostSuccess ? (
                         <>
-                          <LinkedInPost article={article} />
-                          <TwitterPost article={article} />
+                          <LinkedInPost
+                            article={article}
+                            func={postOnSocialMedia}
+                          />
+                          <TwitterPost
+                            article={article}
+                            func={postOnSocialMedia}
+                          />
                         </>
+                      ) : (
+                        <></>
                       )}
                       {isSummarised && !isImageGenerated && (
                         <Button
@@ -529,7 +602,6 @@ export default function HomePage() {
                           size="sm"
                           onClick={async () => {
                             await summarisedResponse(article?.id);
-                            setIsSummarised(true);
                           }}
                         >
                           {isSummaryLoading ? (
@@ -549,18 +621,14 @@ export default function HomePage() {
           </div>
         ) : (
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {" "}
             {isLoading && (
               <Loader2 className="mt-8 absolute left-1/2 top-1/2 w-10 animate-spin" />
-            )}{" "}
+            )}
             {oldArticles && oldArticles.length > 0 ? (
               oldArticles.map((article) => (
                 <Card key={article?.id} className="overflow-hidden p-4">
-                  {" "}
                   <CardHeader className="p-4">
-                    {" "}
                     <div className="flex justify-center">
-                      {" "}
                       {article?.image && (
                         <Image
                           height={200}
@@ -569,26 +637,21 @@ export default function HomePage() {
                           alt="News Image"
                           src={article?.image}
                         />
-                      )}{" "}
-                    </div>{" "}
-                  </CardHeader>{" "}
+                      )}
+                    </div>
+                  </CardHeader>
                   <CardContent className="text-center px-2">
-                    {" "}
                     <Textarea
                       className="mb-2 text-sm text-gray-500 overflow-y-auto h-[120px]"
                       readOnly
                       value={article?.text}
-                    ></Textarea>{" "}
-                  </CardContent>{" "}
+                    ></Textarea>
+                  </CardContent>
                   <CardFooter className="flex justify-center gap-4 pb-4">
-                    {" "}
                     <div>
-                      {" "}
                       <div className="flex justify-left">
-                        {" "}
                         <div className="flex items-center ml-8 my-5">
-                          {" "}
-                          <Heart className="cursor-pointer" />{" "}
+                          <Heart className="cursor-pointer" />
                           <input
                             type="input"
                             value={
@@ -606,11 +669,10 @@ export default function HomePage() {
                                 Number(e.target.value)
                               )
                             }
-                          />{" "}
+                          />
                         </div>
                         <div className="flex items-center my-5 ml-5">
-                          {" "}
-                          <Send className="cursor-pointer" />{" "}
+                          <Send className="cursor-pointer" />
                           <input
                             type="input"
                             value={
@@ -628,11 +690,10 @@ export default function HomePage() {
                                 Number(e.target.value)
                               )
                             }
-                          />{" "}
+                          />
                         </div>
                         <div className="flex items-center my-5 ml-5">
-                          {" "}
-                          <ChartNoAxesColumn className="cursor-pointer" />{" "}
+                          <ChartNoAxesColumn className="cursor-pointer" />
                           <input
                             type="input"
                             value={
@@ -650,42 +711,36 @@ export default function HomePage() {
                                 Number(e.target.value)
                               )
                             }
-                          />{" "}
-                        </div>{" "}
-                      </div>{" "}
+                          />
+                        </div>
+                      </div>
                       <div className="flex justify-between gap-3">
-                        {" "}
                         <Button
                           variant="outline"
                           className="px-16 py-4 rounded-xl cursor-pointer"
                           size="sm"
                           onClick={() => toggleEditMode(article?.id)}
                         >
-                          {" "}
-                          {`${
-                            editStates[article?.id] ? "Cancel" : "Edit"
-                          }`}{" "}
-                        </Button>{" "}
+                          {`${editStates[article?.id] ? "Cancel" : "Edit"}`}
+                        </Button>
                         <Button
                           className="px-16 py-4 rounded-xl cursor-pointer"
                           size="sm"
                           disabled={!editStates[article?.id]}
                           onClick={() => handleSubmit(article?.id)}
                         >
-                          {" "}
-                          Submit{" "}
-                        </Button>{" "}
-                      </div>{" "}
-                    </div>{" "}
-                  </CardFooter>{" "}
+                          Submit
+                        </Button>
+                      </div>
+                    </div>
+                  </CardFooter>
                 </Card>
               ))
             ) : (
               <p className="text-3xl font-semibold flex items-center mt-6">
-                {" "}
-                You have no older posts{" "}
+                You have no older posts
               </p>
-            )}{" "}
+            )}
           </div>
         )}
       </main>

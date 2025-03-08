@@ -14,9 +14,10 @@ import { Article } from "../page";
 
 type TwitterPostProps = {
   article: Article;
+  func: (value: Article) => void;
 };
 
-export const TwitterPost = ({ article }: TwitterPostProps) => {
+export const TwitterPost = ({ article, func }: TwitterPostProps) => {
   const [showFullText, setShowFullText] = useState(false);
 
   return (
@@ -63,19 +64,27 @@ export const TwitterPost = ({ article }: TwitterPostProps) => {
                   <br />
                   {article.citation}
                 </div>
-                {article?.image && <div className="mt-3 rounded-2xl overflow-hidden">
-                  <img
-                    src={article.image}
-                    alt="Design Project"
-                    className="w-full h-auto object-cover cursor-pointer"
-                  />
-                </div>}
+                {article?.image && (
+                  <div className="mt-3 rounded-2xl overflow-hidden">
+                    <img
+                      src={article.image}
+                      alt="Design Project"
+                      className="w-full h-auto object-cover cursor-pointer"
+                    />
+                  </div>
+                )}
               </div>
             </div>
           </div>
         </div>
         <DialogFooter>
-          <Button type="submit" className="cursor-pointer">Post</Button>
+          <Button
+            type="submit"
+            className="cursor-pointer"
+            onClick={() => func(article)}
+          >
+            Post
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
