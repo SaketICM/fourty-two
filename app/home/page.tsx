@@ -12,7 +12,13 @@ import {
   CardHeader,
 } from "@/components/ui/card";
 import { toast } from "sonner";
-import { ChartNoAxesColumn, Heart, Loader, Loader2, Send } from "lucide-react";
+import {
+  ChartNoAxesColumn,
+  CornerDownLeft,
+  Heart,
+  Loader2,
+  Send,
+} from "lucide-react";
 import { LinkedInPost } from "./components/linkedin-post";
 import { InstagramPost } from "./components/instagram-post";
 import { TwitterPost } from "./components/twitter-post";
@@ -44,6 +50,9 @@ export default function HomePage() {
   const [currentState, setcurrentState] = useState("create_post");
   const [isLoading, setIsLoading] = useState(false);
   const [isSummaryLoading, setIsSummaryLoading] = useState(false);
+  const [isImageLoading, setIsImageLoading] = useState(false);
+  const [isImageGenerated, setIsImageGenerated] = useState(false);
+  const [isSummarised, setIsSummarised] = useState(false);
 
   const [articles, setArticles] = useState<Article[] | null>(null);
   const [oldArticles, setoldArticles] = useState<Article[] | null>();
@@ -103,8 +112,6 @@ export default function HomePage() {
       const data = await response.json();
 
       setIsLoading(false);
-
-      console.log("93 : ", data);
 
       if (!data.success) {
         return {
@@ -170,6 +177,54 @@ export default function HomePage() {
       return {
         success: false,
         message: "Unable to fetch summarize data",
+      };
+    }
+  };
+
+  // Fetch images
+  const imageGeneration = async (id: string) => {
+    try {
+      setIsImageLoading(true);
+
+      const response = await fetch(
+        `https://team42.incredmoney.com/users/prompts/text/${id}/image`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${getToken()}`,
+          },
+        }
+      );
+
+      const data = await response.json();
+
+      const { _id, imageData } = data.data;
+
+      articles?.forEach((article) => {
+        if (article.id === _id) {
+          article.image = imageData?.url ?? "";
+        }
+      });
+
+      setIsImageLoading(false);
+
+      if (!data.success) {
+        return {
+          success: false,
+          message: data.message || "Unable to create an image",
+        };
+      }
+
+      return {
+        success: true,
+        message: "Image created successfully",
+        data: data.data,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: "Unable to create an image",
       };
     }
   };
@@ -377,12 +432,13 @@ export default function HomePage() {
             </TabsTrigger>
           </TabsList>
         </Tabs>
+
         {currentState !== "old_post" && (
           <div>
             <div className="mb-12 mt-40 text-center">
-              <h2
-                className="mb-2 text-4xl font-bold bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text text-transparent"
-              >Leave the ordinary behind</h2>
+              <h2 className="mb-2 text-4xl font-bold bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text text-transparent">
+                Leave the ordinary behind
+              </h2>
               <p className="text-gray-600">
                 Create you next social media post with AI
               </p>
@@ -411,7 +467,7 @@ export default function HomePage() {
         )}
 
         {currentState === "create_post" ? (
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <div className="mx-auto w-96">
             {isLoading && (
               <Loader2 className="mt-8 absolute left-1/2 top-1/2 w-10 animate-spin" />
             )}
@@ -440,26 +496,52 @@ export default function HomePage() {
                   </CardContent>
                   <CardFooter className="flex justify-center gap-4 pb-4">
                     <div className="gap-3 flex">
-                      <LinkedInPost article={article} />
-                      {/* <InstagramPost article={article} /> */}
-                      <TwitterPost article={article} />
-                      <Button
-                        variant="default"
-                        className="text-xs cursor-pointer"
-                        size="sm"
-                        onClick={async () => {
-                          await summarisedResponse(article?.id);
-                        }}
-                      >
-                        {isSummaryLoading ? (
-                          <>
-                            <Loader2 className="h-4 w-4 animate-spin" />
-                            Summarizing...
-                          </>
-                        ) : (
-                          "Summarize"
-                        )}
-                      </Button>
+                      {isSummarised && isImageGenerated && (
+                        <>
+                          <LinkedInPost article={article} />
+                          <TwitterPost article={article} />
+                        </>
+                      )}
+                      {isSummarised && !isImageGenerated && (
+                        <Button
+                          variant="default"
+                          className="text-xs"
+                          size="sm"
+                          onClick={() => {
+                            imageGeneration(article?.id);
+                            setIsImageGenerated(true);
+                          }}
+                        >
+                          {isImageLoading ? (
+                            <>
+                              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                              Generating Image...
+                            </>
+                          ) : (
+                            "Generate Image"
+                          )}
+                        </Button>
+                      )}
+                      {!isSummarised && (
+                        <Button
+                          variant="default"
+                          className="text-xs"
+                          size="sm"
+                          onClick={async () => {
+                            await summarisedResponse(article?.id);
+                            setIsSummarised(true);
+                          }}
+                        >
+                          {isSummaryLoading ? (
+                            <>
+                              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                              Summarizing...
+                            </>
+                          ) : (
+                            "Summarize"
+                          )}
+                        </Button>
+                      )}
                     </div>
                   </CardFooter>
                 </Card>
@@ -467,14 +549,18 @@ export default function HomePage() {
           </div>
         ) : (
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {" "}
             {isLoading && (
               <Loader2 className="mt-8 absolute left-1/2 top-1/2 w-10 animate-spin" />
-            )}
-            {oldArticles && oldArticles.length > 0 ?
+            )}{" "}
+            {oldArticles && oldArticles.length > 0 ? (
               oldArticles.map((article) => (
                 <Card key={article?.id} className="overflow-hidden p-4">
+                  {" "}
                   <CardHeader className="p-4">
+                    {" "}
                     <div className="flex justify-center">
+                      {" "}
                       {article?.image && (
                         <Image
                           height={200}
@@ -483,21 +569,26 @@ export default function HomePage() {
                           alt="News Image"
                           src={article?.image}
                         />
-                      )}
-                    </div>
-                  </CardHeader>
+                      )}{" "}
+                    </div>{" "}
+                  </CardHeader>{" "}
                   <CardContent className="text-center px-2">
+                    {" "}
                     <Textarea
                       className="mb-2 text-sm text-gray-500 overflow-y-auto h-[120px]"
                       readOnly
                       value={article?.text}
-                    ></Textarea>
-                  </CardContent>
+                    ></Textarea>{" "}
+                  </CardContent>{" "}
                   <CardFooter className="flex justify-center gap-4 pb-4">
+                    {" "}
                     <div>
+                      {" "}
                       <div className="flex justify-left">
+                        {" "}
                         <div className="flex items-center ml-8 my-5">
-                          <Heart className="cursor-pointer" />
+                          {" "}
+                          <Heart className="cursor-pointer" />{" "}
                           <input
                             type="input"
                             value={
@@ -515,11 +606,11 @@ export default function HomePage() {
                                 Number(e.target.value)
                               )
                             }
-                          />
+                          />{" "}
                         </div>
-
                         <div className="flex items-center my-5 ml-5">
-                          <Send className="cursor-pointer" />
+                          {" "}
+                          <Send className="cursor-pointer" />{" "}
                           <input
                             type="input"
                             value={
@@ -537,11 +628,11 @@ export default function HomePage() {
                                 Number(e.target.value)
                               )
                             }
-                          />
+                          />{" "}
                         </div>
-
                         <div className="flex items-center my-5 ml-5">
-                          <ChartNoAxesColumn className="cursor-pointer" />
+                          {" "}
+                          <ChartNoAxesColumn className="cursor-pointer" />{" "}
                           <input
                             type="input"
                             value={
@@ -559,35 +650,50 @@ export default function HomePage() {
                                 Number(e.target.value)
                               )
                             }
-                          />
-                        </div>
-                      </div>
+                          />{" "}
+                        </div>{" "}
+                      </div>{" "}
                       <div className="flex justify-between gap-3">
+                        {" "}
                         <Button
                           variant="outline"
                           className="px-16 py-4 rounded-xl cursor-pointer"
                           size="sm"
                           onClick={() => toggleEditMode(article?.id)}
                         >
-                          {`${editStates[article?.id] ? "Cancel" : "Edit"}`}
-                        </Button>
+                          {" "}
+                          {`${
+                            editStates[article?.id] ? "Cancel" : "Edit"
+                          }`}{" "}
+                        </Button>{" "}
                         <Button
                           className="px-16 py-4 rounded-xl cursor-pointer"
                           size="sm"
                           disabled={!editStates[article?.id]}
                           onClick={() => handleSubmit(article?.id)}
                         >
-                          Submit
-                        </Button>
-                      </div>
-                    </div>
-                  </CardFooter>
+                          {" "}
+                          Submit{" "}
+                        </Button>{" "}
+                      </div>{" "}
+                    </div>{" "}
+                  </CardFooter>{" "}
                 </Card>
-              )) : <p className="text-3xl font-semibold flex items-center mt-6">You have no older posts</p>}
+              ))
+            ) : (
+              <p className="text-3xl font-semibold flex items-center mt-6">
+                {" "}
+                You have no older posts{" "}
+              </p>
+            )}{" "}
           </div>
         )}
       </main>
       <Toaster position="top-center" />
     </div>
   );
+}
+
+{
+  /* <InstagramPost article={article} /> */
 }
