@@ -12,12 +12,7 @@ import {
   CardHeader,
 } from "@/components/ui/card";
 import { toast } from "sonner";
-import {
-  ChartNoAxesColumn,
-  Heart,
-  Loader2,
-  Send,
-} from "lucide-react";
+import { ChartNoAxesColumn, Heart, Loader2, Send } from "lucide-react";
 import { LinkedInPost } from "./components/linkedin-post";
 import { TwitterPost } from "./components/twitter-post";
 import Image from "next/image";
@@ -257,7 +252,6 @@ export default function HomePage() {
         }
       });
 
-      
       if (!data.success) {
         toast.error("Unable to create an image. Please try again later");
         return {
@@ -342,6 +336,13 @@ export default function HomePage() {
     const result = await updatePostMeta(id, articleValues[id]?.stats);
 
     if (result?.success) {
+      getAllPosts().then((data) => {
+        if (data?.success) {
+          setoldArticles(data?.posts);
+        } else {
+          setoldArticles([]);
+        }
+      });
       toast.success("Article updated successfully");
     } else {
       toast.error("Failed to update article");
