@@ -83,14 +83,17 @@ export default function HomePage() {
     try {
       setIsLoading(true);
 
-      const response = await fetch("http://localhost:5000/users/prompts/text", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${getToken()}`,
-        },
-        body: JSON.stringify({ text }),
-      });
+      const response = await fetch(
+        "https://team42.incredmoney.com/api/users/prompts/text",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${getToken()}`,
+          },
+          body: JSON.stringify({ text }),
+        }
+      );
 
       const data = await response.json();
 
@@ -123,7 +126,7 @@ export default function HomePage() {
     try {
       setIsSummaryLoading(true);
       const response = await fetch(
-        `http://localhost:5000/users/prompts/text/${_id}/summarize`,
+        `https://team42.incredmoney.com/api/users/prompts/text/${_id}/summarize`,
         {
           method: "GET",
           headers: {
@@ -375,7 +378,7 @@ export default function HomePage() {
                 Diversify with confidence
               </h2>
               <p className="text-gray-600">
-                Robust financial products for your satellite investments.
+                Create you next social media post with AI
               </p>
             </div>
 
@@ -383,7 +386,7 @@ export default function HomePage() {
               <div className="relative w-full max-w-md">
                 <Input
                   type="text"
-                  placeholder="Hinted search text"
+                  placeholder="Hinted search text.."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="pr-10 rounded-full"
