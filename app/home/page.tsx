@@ -337,17 +337,18 @@ export default function HomePage() {
             <div className="mr-2 flex h-8 w-8 items-center justify-center border-2 border-blue-600">
               <div className="text-orange-500">✓</div>
             </div>
-            <span className="text-xl font-bold">
-              <span className="text-blue-600">Team</span>
-              <span className="text-orange-500">42</span>
+            <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-orange-500 bg-clip-text text-transparent">
+              Team42
             </span>
           </div>
           <Button
             variant="outline"
             onClick={handleLogout}
-            className="cursor-pointer"
+            className="cusor-pointer"
           >
-            Logout
+            <span className="bg-gradient-to-r from-blue-600 to-orange-500 bg-clip-text text-transparent">
+              Logout
+            </span>
           </Button>
         </div>
       </header>
@@ -374,7 +375,7 @@ export default function HomePage() {
         {currentState !== "old_post" && (
           <div>
             <div className="mb-12 mt-40 text-center">
-              <h2 className="mb-2 text-4xl font-bold">
+              <h2 className="mb-2 text-4xl font-bold text-4xl font-bold bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text text-transparent">
                 Diversify with confidence
               </h2>
               <p className="text-gray-600">
