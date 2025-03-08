@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { getAllPosts, getToken, updatePostMeta } from "@/lib/auth";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -14,13 +14,11 @@ import {
 import { toast } from "sonner";
 import {
   ChartNoAxesColumn,
-  CornerDownLeft,
   Heart,
   Loader2,
   Send,
 } from "lucide-react";
 import { LinkedInPost } from "./components/linkedin-post";
-import { InstagramPost } from "./components/instagram-post";
 import { TwitterPost } from "./components/twitter-post";
 import Image from "next/image";
 import { Textarea } from "@/components/ui/textarea";
@@ -31,6 +29,7 @@ import { Toaster } from "@/components/ui/sonner";
 import removeMarkdown from "remove-markdown";
 
 export type Article = {
+  id?: string;
   _id: string;
   image?: string;
   text: string;
@@ -45,8 +44,6 @@ export type Article = {
 
 export default function HomePage() {
   const router = useRouter();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
   const [searchQuery, setSearchQuery] = useState("");
   const [currentState, setcurrentState] = useState("create_post");
   const [isLoading, setIsLoading] = useState(false);
@@ -108,7 +105,7 @@ export default function HomePage() {
             Authorization: `Bearer ${getToken()}`,
           },
           body: JSON.stringify({
-            promptId: article?._id,
+            promptId: article?._id ?? article?.id,
             text: article?.text,
             image: article?.image,
             summary: article?.summary,
@@ -202,8 +199,6 @@ export default function HomePage() {
 
       const data = await response.json();
 
-      console.log("Data : ", data);
-
       const updatedArticle = articles?.map((article) => ({
         ...article,
         summary: data?.data?.summarizedText ?? "",
@@ -214,6 +209,7 @@ export default function HomePage() {
       }
 
       setIsSummaryLoading(false);
+      setIsSummarised(true);
 
       if (!data.success) {
         return {
@@ -256,19 +252,22 @@ export default function HomePage() {
       const { _id, imageData } = data.data;
 
       articles?.forEach((article) => {
-        if (article._id === _id) {
+        if (article._id === _id || article.id === _id) {
           article.image = imageData?.url ?? "";
         }
       });
 
-      setIsImageLoading(false);
-
+      
       if (!data.success) {
+        toast.error("Unable to create an image. Please try again later");
         return {
           success: false,
           message: data.message || "Unable to create an image",
         };
       }
+
+      setIsImageLoading(false);
+      setIsImageGenerated(true);
 
       return {
         success: true,
@@ -447,8 +446,8 @@ export default function HomePage() {
               <Loader2 className="mt-8 absolute left-1/2 top-1/2 w-10 animate-spin" />
             )}
             {articles &&
-              articles.map((article) => (
-                <Card key={article._id} className="overflow-hidden p-4">
+              articles.map((article, index) => (
+                <Card className="overflow-hidden p-4" key={index}>
                   <CardHeader className="p-4">
                     <div className="flex justify-center">
                       {article?.image && (
@@ -499,7 +498,7 @@ export default function HomePage() {
                           className="text-xs"
                           size="sm"
                           onClick={() => {
-                            imageGeneration(article?._id);
+                            imageGeneration(article?.id);
                           }}
                         >
                           {isImageLoading ? (
@@ -518,7 +517,7 @@ export default function HomePage() {
                           className="text-xs"
                           size="sm"
                           onClick={async () => {
-                            await summarisedResponse(article?._id);
+                            await summarisedResponse(article?.id ?? "");
                           }}
                         >
                           {isSummaryLoading ? (
@@ -664,8 +663,4 @@ export default function HomePage() {
       <Toaster position="top-center" />
     </div>
   );
-}
-
-{
-  /* <InstagramPost article={article} /> */
 }
