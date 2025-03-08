@@ -46,6 +46,7 @@ export default function HomePage() {
   const [isSummaryLoading, setIsSummaryLoading] = useState(false);
 
   const [articles, setArticles] = useState<Article[] | null>(null);
+  const [oldArticles, setoldArticles] = useState<Article[] | null>();
   const [editStates, setEditStates] = useState<{ [key: string]: boolean }>({});
   const [articleValues, setArticleValues] = useState<{
     [key: string]: Article;
@@ -53,7 +54,11 @@ export default function HomePage() {
 
   useEffect(() => {
     getAllPosts().then((data) => {
-      console.log(data);
+      if (data?.success) {
+        setoldArticles(data?.posts);
+      } else {
+        setoldArticles([]);
+      }
     });
   }, []);
 
@@ -375,8 +380,8 @@ export default function HomePage() {
         {currentState !== "old_post" && (
           <div>
             <div className="mb-12 mt-40 text-center">
-              <h2 className="mb-2 text-4xl font-bold text-4xl font-bold bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text text-transparent">
-                Diversify with confidence
+              <h2 className="mb-2 text-4xl font-bold bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text text-transparent">
+                Leave the ordinary behind
               </h2>
               <p className="text-gray-600">
                 Create you next social media post with AI
@@ -387,7 +392,7 @@ export default function HomePage() {
               <div className="relative w-full max-w-md">
                 <Input
                   type="text"
-                  placeholder="Hinted search text.."
+                  placeholder="Start typing your next post..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="pr-10 rounded-full"
@@ -406,58 +411,90 @@ export default function HomePage() {
           </div>
         )}
 
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {isLoading && (
-            <Loader2 className="mt-8 absolute left-1/2 top-1/2 w-10 animate-spin" />
-          )}
-          {articles &&
-            articles.map((article) => (
-              <Card key={article.id} className="overflow-hidden p-4">
-                <CardHeader className="p-4">
-                  <div className="flex justify-center">
-                    {article?.image && (
-                      <Image
-                        height={200}
-                        width={200}
-                        className="w-full rounded-lg"
-                        alt="News Image"
-                        src={article?.image}
-                      />
-                    )}
-                  </div>
-                </CardHeader>
-                <CardContent className="text-center px-2">
-                  <Textarea
-                    className="mb-2 text-sm text-gray-500 overflow-y-auto h-[120px]"
-                    readOnly
-                    value={article?.text}
-                  ></Textarea>
-                </CardContent>
-                <CardFooter className="flex justify-center gap-4 pb-4">
-                  {searchParams.get("page") !== "old_post" ? (
-                    <div className="gap-3 flex">
-                      <LinkedInPost article={article} />
-                      {/* <InstagramPost article={article} /> */}
-                      <TwitterPost article={article} />
-                      <Button
-                        variant="default"
-                        className="text-xs cursor-pointer"
-                        size="sm"
-                        onClick={async () => {
-                          await summarisedResponse(article?.id);
-                        }}
-                      >
-                        {isSummaryLoading ? (
-                          <>
-                            <Loader2 className="h-4 w-4 animate-spin" />
-                            Summarizing...
-                          </>
-                        ) : (
-                          "Summarize"
-                        )}
-                      </Button>
+        {currentState === "create_post" ? (
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {isLoading && (
+              <Loader2 className="mt-8 absolute left-1/2 top-1/2 w-10 animate-spin" />
+            )}
+            {articles &&
+              articles.map((article) => (
+                <Card key={article.id} className="overflow-hidden p-4">
+                  <CardHeader className="p-4">
+                    <div className="flex justify-center">
+                      {article?.image && (
+                        <Image
+                          height={200}
+                          width={200}
+                          className="w-full rounded-lg"
+                          alt="News Image"
+                          src={article?.image}
+                        />
+                      )}
                     </div>
-                  ) : (
+                  </CardHeader>
+                  <CardContent className="text-center px-2">
+                    <Textarea
+                      className="mb-2 text-sm text-gray-500 overflow-y-auto h-[120px]"
+                      readOnly
+                      value={article?.text}
+                    ></Textarea>
+                  </CardContent>
+                  <CardFooter className="flex justify-center gap-4 pb-4">
+                      <div className="gap-3 flex">
+                        <LinkedInPost article={article} />
+                        {/* <InstagramPost article={article} /> */}
+                        <TwitterPost article={article} />
+                        <Button
+                          variant="default"
+                          className="text-xs cursor-pointer"
+                          size="sm"
+                          onClick={async () => {
+                            await summarisedResponse(article?.id);
+                          }}
+                        >
+                          {isSummaryLoading ? (
+                            <>
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                              Summarizing...
+                            </>
+                          ) : (
+                            "Summarize"
+                          )}
+                        </Button>
+                      </div>}
+                  </CardFooter>
+                </Card>
+              ))}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {isLoading && (
+              <Loader2 className="mt-8 absolute left-1/2 top-1/2 w-10 animate-spin" />
+            )}
+            {articles &&
+              articles.map((article) => (
+                <Card key={article?.id} className="overflow-hidden p-4">
+                  <CardHeader className="p-4">
+                    <div className="flex justify-center">
+                      {article?.image && (
+                        <Image
+                          height={200}
+                          width={200}
+                          className="w-full rounded-lg"
+                          alt="News Image"
+                          src={article?.image}
+                        />
+                      )}
+                    </div>
+                  </CardHeader>
+                  <CardContent className="text-center px-2">
+                    <Textarea
+                      className="mb-2 text-sm text-gray-500 overflow-y-auto h-[120px]"
+                      readOnly
+                      value={article?.text}
+                    ></Textarea>
+                  </CardContent>
+                  <CardFooter className="flex justify-center gap-4 pb-4">
                     <div>
                       <div className="flex justify-left">
                         <div className="flex items-center ml-8 my-5">
@@ -465,16 +502,16 @@ export default function HomePage() {
                           <input
                             type="input"
                             value={
-                              editStates[article.id]
-                                ? articleValues[article.id]?.meta?.likes ??
-                                  article.meta?.likes
-                                : article.meta?.likes
+                              editStates[article?.id]
+                                ? articleValues[article?.id]?.meta?.likes ??
+                                  article?.meta?.likes
+                                : article?.meta?.likes ?? 0
                             }
                             className="max-w-14 ml-2 text-lg focus:outline-0"
-                            readOnly={!editStates[article.id]}
+                            readOnly={!editStates[article?.id]}
                             onChange={(e) =>
                               handleChange(
-                                article.id,
+                                article?.id,
                                 "likes",
                                 Number(e.target.value)
                               )
@@ -487,10 +524,10 @@ export default function HomePage() {
                           <input
                             type="input"
                             value={
-                              editStates[article.id]
-                                ? articleValues[article.id]?.meta?.reach ??
-                                  article.meta.reach
-                                : article.meta.reach
+                              editStates[article?.id]
+                                ? articleValues[article?.id]?.meta?.reach ??
+                                  article?.meta?.reach
+                                : article?.meta?.reach ?? 0
                             }
                             className="max-w-14 ml-2 text-lg focus:outline-0"
                             readOnly={!editStates[article.id]}
@@ -511,14 +548,14 @@ export default function HomePage() {
                             value={
                               editStates[article.id]
                                 ? articleValues[article.id]?.meta
-                                    ?.impressions ?? article.meta.impressions
-                                : article.meta.impressions
+                                    ?.impressions ?? article?.meta?.impressions
+                                : article?.meta?.impressions ?? 0
                             }
                             className="max-w-14 ml-2 text-lg focus:outline-0"
                             readOnly={!editStates[article.id]}
                             onChange={(e) =>
                               handleChange(
-                                article.id,
+                                article?.id,
                                 "impressions",
                                 Number(e.target.value)
                               )
@@ -526,30 +563,30 @@ export default function HomePage() {
                           />
                         </div>
                       </div>
-                      <div className="flex justify-between">
+                      <div className="flex justify-between gap-3">
                         <Button
                           variant="outline"
                           className="px-16 py-4 rounded-xl cursor-pointer"
                           size="sm"
-                          onClick={() => toggleEditMode(article.id)}
+                          onClick={() => toggleEditMode(article?.id)}
                         >
-                          {`${editStates[article.id] ? "Cancel" : "Edit"}`}
+                          {`${editStates[article?.id] ? "Cancel" : "Edit"}`}
                         </Button>
                         <Button
                           className="px-16 py-4 rounded-xl cursor-pointer"
                           size="sm"
-                          disabled={!editStates[article.id]}
-                          onClick={() => handleSubmit(article.id)}
+                          disabled={!editStates[article?.id]}
+                          onClick={() => handleSubmit(article?.id)}
                         >
                           Submit
                         </Button>
                       </div>
                     </div>
-                  )}
-                </CardFooter>
-              </Card>
-            ))}
-        </div>
+                  </CardFooter>
+                </Card>
+              ))}
+          </div>
+        )}
       </main>
       <Toaster position="top-center" />
     </div>

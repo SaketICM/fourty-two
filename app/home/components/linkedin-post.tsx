@@ -103,13 +103,13 @@ export const LinkedInPost = ({ article }: LinkedInPostProps) => {
           <br />
           {article.citation}
         </p>
-        <Image
+        {article?.image && <Image
           src={article.image}
           alt="Project Preview"
           className="w-full rounded-lg"
           height={250}
           width={250}
-        />
+        />}
 
         {/* </CardContent>
         </Card> */}

@@ -137,13 +137,13 @@ export const TwitterPost = ({ article }: TwitterPostProps) => {
                   <br />
                   {article.citation}
                 </div>
-                <div className="mt-3 rounded-2xl overflow-hidden">
+                {article?.image && <div className="mt-3 rounded-2xl overflow-hidden">
                   <img
                     src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800"
                     alt="Design Project"
                     className="w-full h-auto object-cover cursor-pointer"
                   />
-                </div>
+                </div>}
               </div>
             </div>
           </div>
