@@ -5,7 +5,6 @@ export const setToken = (token: string) => {
   }
 };
 
-// Get token from localStorage
 export const getToken = (): string | null => {
   try {
     if (typeof window === "undefined") return null;
@@ -65,13 +64,16 @@ export const registerUser = async (
   username: string
 ) => {
   try {
-    const response = await fetch("https://team42.incredmoney.com/api/auth/register", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ email, password, username }),
-    });
+    const response = await fetch(
+      "https://team42.incredmoney.com/api/auth/register",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, password, username }),
+      }
+    );
 
     const data = await response.json();
 
@@ -89,13 +91,16 @@ export const registerUser = async (
 // Login a user
 export const loginUser = async (email: string, password: string) => {
   try {
-    const response = await fetch("https://team42.incredmoney.com/api/auth/login", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ email, password }),
-    });
+    const response = await fetch(
+      "https://team42.incredmoney.com/api/auth/login",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, password }),
+      }
+    );
 
     const data = await response.json();
 
@@ -116,7 +121,7 @@ export const loginUser = async (email: string, password: string) => {
 export const updatePostMeta = async (postId: string, meta: any) => {
   try {
     const response = await fetch(
-      `https://team42.incredmoney.com/api/users/posts/${postId}/update`,
+      `https://team42.incredmoney.com/users/posts/${postId}/update`,
       {
         method: "POST",
         headers: {
@@ -141,7 +146,7 @@ export const updatePostMeta = async (postId: string, meta: any) => {
 
 export const getAllPosts = async () => {
   try {
-    const response = await fetch("https://team42.incredmoney.com/api/users/posts", {
+    const response = await fetch("https://team42.incredmoney.com/users/posts", {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
