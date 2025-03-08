@@ -370,7 +370,7 @@ export default function HomePage() {
         </Tabs>
         {currentState !== "old_post" && (
           <div>
-            <div className="mb-12 text-center">
+            <div className="mb-12 mt-40 text-center">
               <h2 className="mb-2 text-4xl font-bold">
                 Diversify with confidence
               </h2>
