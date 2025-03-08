@@ -31,12 +31,12 @@ import { Toaster } from "@/components/ui/sonner";
 import removeMarkdown from "remove-markdown";
 
 export type Article = {
-  id: string;
+  _id: string;
   image?: string;
   text: string;
   citation?: string;
   summary?: string;
-  meta: {
+  stats: {
     likes: number;
     reach: number;
     impressions: number;
@@ -78,13 +78,13 @@ export default function HomePage() {
     if (!editStates[id]) {
       setArticleValues((prev) => ({
         ...prev,
-        [id]: articles?.find((article) => article.id === id) || {
-          id: "",
+        [id]: articles?.find((article) => article._id === id) || {
+          _id: "",
           image: "",
           text: "",
           summary: "",
           citation: "",
-          meta: {
+          stats: {
             likes: 0,
             reach: 0,
             impressions: 0,
@@ -108,7 +108,7 @@ export default function HomePage() {
             Authorization: `Bearer ${getToken()}`,
           },
           body: JSON.stringify({
-            promptId: article?.id,
+            promptId: article?._id,
             text: article?.text,
             image: article?.image,
             summary: article?.summary,
@@ -256,7 +256,7 @@ export default function HomePage() {
       const { _id, imageData } = data.data;
 
       articles?.forEach((article) => {
-        if (article.id === _id) {
+        if (article._id === _id) {
           article.image = imageData?.url ?? "";
         }
       });
@@ -321,17 +321,17 @@ export default function HomePage() {
   // Handle input change for a specific article
   const handleChange = (
     id: string,
-    field: keyof Article["meta"],
+    field: keyof Article["stats"],
     value: number
   ) => {
     setArticleValues((prev) => ({
       ...prev,
       [id]: {
         ...prev[id],
-        meta: {
-          likes: prev[id]?.meta?.likes || 0,
-          reach: prev[id]?.meta?.reach || 0,
-          impressions: prev[id]?.meta?.impressions || 0,
+        stats: {
+          likes: prev[id]?.stats?.likes || 0,
+          reach: prev[id]?.stats?.reach || 0,
+          impressions: prev[id]?.stats?.impressions || 0,
           [field]: value,
         },
       },
@@ -340,7 +340,7 @@ export default function HomePage() {
 
   // Handle submit for a specific article
   const handleSubmit = async (id: string) => {
-    const result = await updatePostMeta(id, articleValues[id]?.meta);
+    const result = await updatePostMeta(id, articleValues[id]?.stats);
 
     if (result?.success) {
       toast.success("Article updated successfully");
@@ -350,82 +350,6 @@ export default function HomePage() {
 
     toggleEditMode(id);
   };
-
-  // Mock articles data
-  // const articles: Article[] = [
-  //   {
-  //     id: "87y",
-  //     image:
-  //       "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800",
-  //     text: "Excited to share that I've just completed a major redesign project forour flagship product! 🎉Excited to share that I've just completed a major redesign project forour flagship product! 🎉Excited to share that I've just completed a major redesign project forour flagship product! 🎉Excited to share that I've just completed a major redesign project forour flagship product! 🎉Excited to share that I've just completed a major redesign project forour flagship product! 🎉",
-  //     citation: "Trends in retail investors shifting from stocks to bonds",
-  //     meta: {
-  //       likes: 100,
-  //       reach: 1000,
-  //       impressions: 973,
-  //     },
-  //   },
-  //   {
-  //     id: "98",
-  //     image:
-  //       "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800",
-  //     text: "Excited to share that I've just completed a major redesign project forour flagship product! 🎉",
-  //     citation: "Trends in retail investors shifting from stocks to bonds",
-  //     meta: {
-  //       likes: 10,
-  //       reach: 243,
-  //       impressions: 155,
-  //     },
-  //   },
-  //   {
-  //     id: "09oji",
-  //     image:
-  //       "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800",
-  //     text: "Excited to share that I've just completed a major redesign project forour flagship product! 🎉",
-  //     citation: "Trends in retail investors shifting from stocks to bonds",
-  //     meta: {
-  //       likes: 100,
-  //       reach: 1000,
-  //       impressions: 973,
-  //     },
-  //   },
-  //   {
-  //     id: "09oi",
-  //     image:
-  //       "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800",
-  //     text: "Excited to share that I've just completed a major redesign project forour flagship product! 🎉",
-  //     citation: "Trends in retail investors shifting from stocks to bonds",
-  //     meta: {
-  //       likes: 100,
-  //       reach: 1000,
-  //       impressions: 973,
-  //     },
-  //   },
-  //   {
-  //     id: "09o978i",
-  //     image:
-  //       "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800",
-  //     text: "Excited to share that I've just completed a major redesign project forour flagship product! 🎉",
-  //     citation: "Trends in retail investors shifting from stocks to bonds",
-  //     meta: {
-  //       likes: 100,
-  //       reach: 1000,
-  //       impressions: 973,
-  //     },
-  //   },
-  //   {
-  //     id: "98oi",
-  //     image:
-  //       "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800",
-  //     text: "Excited to share that I've just completed a major redesign project forour flagship product! 🎉",
-  //     citation: "Trends in retail investors shifting from stocks to bonds",
-  //     meta: {
-  //       likes: 100,
-  //       reach: 1000,
-  //       impressions: 973,
-  //     },
-  //   },
-  // ];
 
   useEffect(() => {
     const token = getToken();
@@ -439,12 +363,6 @@ export default function HomePage() {
     toast.success("Logged out successfully");
     router.push("/login");
   };
-
-  // if (isLoading) {
-  //   return <Loader2 className="absolute left-1/2 top-1/2 w-10 animate-spin" />;
-  // }
-
-  console.log("Articles", articles);
 
   return (
     <div className="min-h-screen bg-white max-w-7xl mx-auto">
@@ -530,7 +448,7 @@ export default function HomePage() {
             )}
             {articles &&
               articles.map((article) => (
-                <Card key={article.id} className="overflow-hidden p-4">
+                <Card key={article._id} className="overflow-hidden p-4">
                   <CardHeader className="p-4">
                     <div className="flex justify-center">
                       {article?.image && (
@@ -581,8 +499,7 @@ export default function HomePage() {
                           className="text-xs"
                           size="sm"
                           onClick={() => {
-                            imageGeneration(article?.id);
-                            setIsImageGenerated(true);
+                            imageGeneration(article?._id);
                           }}
                         >
                           {isImageLoading ? (
@@ -601,7 +518,7 @@ export default function HomePage() {
                           className="text-xs"
                           size="sm"
                           onClick={async () => {
-                            await summarisedResponse(article?.id);
+                            await summarisedResponse(article?._id);
                           }}
                         >
                           {isSummaryLoading ? (
@@ -626,7 +543,7 @@ export default function HomePage() {
             )}
             {oldArticles && oldArticles.length > 0 ? (
               oldArticles.map((article) => (
-                <Card key={article?.id} className="overflow-hidden p-4">
+                <Card key={article?._id} className="overflow-hidden p-4">
                   <CardHeader className="p-4">
                     <div className="flex justify-center">
                       {article?.image && (
@@ -655,16 +572,16 @@ export default function HomePage() {
                           <input
                             type="input"
                             value={
-                              editStates[article?.id]
-                                ? articleValues[article?.id]?.meta?.likes ??
-                                  article?.meta?.likes
-                                : article?.meta?.likes ?? 0
+                              editStates[article?._id]
+                                ? articleValues[article?._id]?.stats?.likes ??
+                                  article?.stats?.likes
+                                : article?.stats?.likes ?? 0
                             }
                             className="max-w-14 ml-2 text-lg focus:outline-0"
-                            readOnly={!editStates[article?.id]}
+                            readOnly={!editStates[article?._id]}
                             onChange={(e) =>
                               handleChange(
-                                article?.id,
+                                article?._id,
                                 "likes",
                                 Number(e.target.value)
                               )
@@ -676,16 +593,16 @@ export default function HomePage() {
                           <input
                             type="input"
                             value={
-                              editStates[article?.id]
-                                ? articleValues[article?.id]?.meta?.reach ??
-                                  article?.meta?.reach
-                                : article?.meta?.reach ?? 0
+                              editStates[article?._id]
+                                ? articleValues[article?._id]?.stats?.reach ??
+                                  article?.stats?.reach
+                                : article?.stats?.reach ?? 0
                             }
                             className="max-w-14 ml-2 text-lg focus:outline-0"
-                            readOnly={!editStates[article.id]}
+                            readOnly={!editStates[article._id]}
                             onChange={(e) =>
                               handleChange(
-                                article.id,
+                                article._id,
                                 "reach",
                                 Number(e.target.value)
                               )
@@ -697,16 +614,16 @@ export default function HomePage() {
                           <input
                             type="input"
                             value={
-                              editStates[article.id]
-                                ? articleValues[article.id]?.meta
-                                    ?.impressions ?? article?.meta?.impressions
-                                : article?.meta?.impressions ?? 0
+                              editStates[article._id]
+                                ? articleValues[article._id]?.stats
+                                    ?.impressions ?? article?.stats?.impressions
+                                : article?.stats?.impressions ?? 0
                             }
                             className="max-w-14 ml-2 text-lg focus:outline-0"
-                            readOnly={!editStates[article.id]}
+                            readOnly={!editStates[article._id]}
                             onChange={(e) =>
                               handleChange(
-                                article?.id,
+                                article?._id,
                                 "impressions",
                                 Number(e.target.value)
                               )
@@ -719,15 +636,15 @@ export default function HomePage() {
                           variant="outline"
                           className="px-16 py-4 rounded-xl cursor-pointer"
                           size="sm"
-                          onClick={() => toggleEditMode(article?.id)}
+                          onClick={() => toggleEditMode(article?._id)}
                         >
-                          {`${editStates[article?.id] ? "Cancel" : "Edit"}`}
+                          {`${editStates[article?._id] ? "Cancel" : "Edit"}`}
                         </Button>
                         <Button
                           className="px-16 py-4 rounded-xl cursor-pointer"
                           size="sm"
-                          disabled={!editStates[article?.id]}
-                          onClick={() => handleSubmit(article?.id)}
+                          disabled={!editStates[article?._id]}
+                          onClick={() => handleSubmit(article?._id)}
                         >
                           Submit
                         </Button>
