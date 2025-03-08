@@ -506,7 +506,7 @@ export default function HomePage() {
                           className="text-xs"
                           size="sm"
                           onClick={() => {
-                            imageGeneration(article?.id);
+                            imageGeneration(article?.id ?? "");
                           }}
                         >
                           {isImageLoading ? (
